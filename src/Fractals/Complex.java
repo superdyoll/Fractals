@@ -11,8 +11,55 @@ package Fractals;
  */
 public class Complex {
     
-    private float real;
-    private float imaginary;
+    private double real;
+    private double imaginary;
     
+    public Complex (double realPart, double imaginaryPart){
+        real = realPart;
+        imaginary = imaginary;
+    }
     
+    public Complex square(){
+        double realPart = (getReal()*getReal()) - (getImaginary()*getImaginary());
+        double imaginaryPart = 2 * getReal() * getImaginary();
+        return new Complex (realPart, imaginaryPart);
+    }
+    
+    public double modulusSquared (){
+        return (getReal()*getReal()) + (getImaginary() * getImaginary());
+    }
+    
+    public Complex add(Complex d){
+        double realPart = real + d.getReal();
+        double imaginaryPart = imaginary + d.getImaginary();
+        return new Complex (realPart, imaginaryPart);
+    }
+
+    /**
+     * @return the real
+     */
+    public double getReal() {
+        return real;
+    }
+
+    /**
+     * @param real the real to set
+     */
+    public void setReal(double real) {
+        this.real = real;
+    }
+
+    /**
+     * @return the imaginary
+     */
+    public double getImaginary() {
+        return imaginary;
+    }
+
+    /**
+     * @param imaginary the imaginary to set
+     */
+    public void setImaginary(double imaginary) {
+        this.imaginary = imaginary;
+    }
 }
