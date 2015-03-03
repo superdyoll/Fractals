@@ -1,0 +1,5 @@
+#Ignore XML's and properties
+*.XML
+*.PROPERTIES
+*.MF
+*.class
