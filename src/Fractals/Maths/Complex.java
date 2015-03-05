@@ -29,6 +29,10 @@ public class Complex {
         return (getReal()*getReal()) + (getImaginary() * getImaginary());
     }
     
+    public double modulus(){
+        return Math.sqrt(modulusSquared());
+    }
+    
     public Complex add(Complex d){
         double realPart = real + d.getReal();
         double imaginaryPart = imaginary + d.getImaginary();
