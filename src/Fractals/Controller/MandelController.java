@@ -15,12 +15,12 @@ import java.awt.image.BufferedImage;
  */
 public class MandelController {
 
-    public BufferedImage drawMandel(int minX, int minY, int maxX, int maxY, int iterations, int zoom) {
+    public BufferedImage drawMandel(int width, int height, int iterations, int zoom) {
         MandelModel newMandel = new MandelModel();
-        BufferedImage graph = new BufferedImage(maxX, maxY, BufferedImage.TYPE_INT_RGB);
-        for (int y = 0; y < maxY; y++) {
-            for (int x = 0; x < maxX; x++) {
-                Complex point = new Complex((x-maxX)/zoom, (y-maxY)/zoom);
+        BufferedImage graph = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                Complex point = new Complex((x-width)/zoom, (y-height)/zoom);
                 int iter = newMandel.calculateMandelPoint(point, iterations);
                 graph.setRGB(x, y, iter | (iter << 8));
             }
