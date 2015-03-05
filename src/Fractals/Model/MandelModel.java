@@ -15,7 +15,7 @@ public class MandelModel extends AbstractModel{
     
     public int calculateMandelPoint (Complex point, int iterations){
         Complex zNumber = point;
-        while(iterations > 0 | zNumber.modulus() < 2){
+        while(iterations > 0 || zNumber.modulus() < 2){
             zNumber = zNumber.square();
             zNumber = zNumber.add(point);
             iterations--;
@@ -25,7 +25,7 @@ public class MandelModel extends AbstractModel{
     
     public int calculateJuliaPoint (Complex point, Complex fixed, int iterations){
         Complex zNumber = point.add(fixed);
-        while (iterations > 0 | zNumber.modulus() < 2){
+        while (iterations > 0 || zNumber.modulus() < 2){
             zNumber = zNumber.square();
             zNumber = zNumber.add(fixed);
             iterations--;

@@ -9,12 +9,13 @@ import Fractals.Maths.Complex;
 import Fractals.Controller.MandelController;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
+import javax.swing.JFrame;
 
 /**
  *
  * @author Lloyd
  */
-public class MandelView extends AbstractViewFrame{
+public class MandelView extends JFrame{
     MandelController control = new MandelController();
     private BufferedImage I;
     
@@ -23,7 +24,7 @@ public class MandelView extends AbstractViewFrame{
         setBounds(100, 100, 800, 600);
         setResizable(false);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
-        I = control.drawMandel(0, 0, getWidth(), getHeight(), 50, 150);
+        I = control.drawMandel(getWidth(), getHeight(), 10, 150);
     }
     
     @Override
