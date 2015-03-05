@@ -5,7 +5,7 @@
 package Fractals.Controller;
 
 import Fractals.Model.AbstractModel;
-import Fractals.View.AbstractViewPanel;
+import Fractals.View.AbstractViewFrame;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.lang.reflect.Method;
@@ -17,11 +17,11 @@ import java.util.ArrayList;
  */
 public abstract class AbstractController implements PropertyChangeListener {
 
-    private ArrayList<AbstractViewPanel> registeredViews;
+    private ArrayList<AbstractViewFrame> registeredViews;
     private ArrayList<AbstractModel> registeredModels;
 
     public AbstractController() {
-        registeredViews = new ArrayList<AbstractViewPanel>();
+        registeredViews = new ArrayList<AbstractViewFrame>();
         registeredModels = new ArrayList<AbstractModel>();
     }
 
@@ -36,11 +36,11 @@ public abstract class AbstractController implements PropertyChangeListener {
         model.removePropertyChangeListener(this);
     }
 
-    public void addView(AbstractViewPanel view) {
+    public void addView(AbstractViewFrame view) {
         registeredViews.add(view);
     }
 
-    public void removeView(AbstractViewPanel view) {
+    public void removeView(AbstractViewFrame view) {
         registeredViews.remove(view);
     }
 
@@ -51,7 +51,7 @@ public abstract class AbstractController implements PropertyChangeListener {
 
     public void propertyChange(PropertyChangeEvent evt) {
 
-        for (AbstractViewPanel view: registeredViews) {
+        for (AbstractViewFrame view: registeredViews) {
             view.modelPropertyChange(evt);
         }
     }

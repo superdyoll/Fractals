@@ -3,3 +3,4 @@
 *.PROPERTIES
 *.MF
 *.class
+/build/

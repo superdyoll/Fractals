@@ -6,13 +6,21 @@
 package Fractals.View;
 
 import java.beans.PropertyChangeEvent;
-import javax.swing.JPanel;
+import javax.swing.JFrame;
 
 /**
  *
  * @author Lloyd
  */
-public abstract class AbstractViewPanel extends JPanel{
+public abstract class AbstractViewFrame extends JFrame{
+    
+    public AbstractViewFrame(){
+        super();
+    }
+    
+    public AbstractViewFrame(String text){
+        super(text);
+    }
 
     public void modelPropertyChange(PropertyChangeEvent evt) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
