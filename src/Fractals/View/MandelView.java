@@ -21,18 +21,19 @@ public class MandelView extends JFrame{
     
     public MandelView(){
         super("Mandelbrot Set");
+        System.out.println("Titled");
         setBounds(100, 100, 800, 600);
         setResizable(false);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
+        System.out.println("Basic I frame things done");
         I = control.drawMandel(getWidth(), getHeight(), 10, 150);
+        System.out.println("Image created");
     }
     
     @Override
     public void paint(Graphics g) {
         g.drawImage(I, 0, 0, this);
+        System.out.println("Drawn");
     }
     
-    public static void main (String [] args){
-        new MandelView().setVisible(true);
-    }
 }

@@ -66,4 +66,8 @@ public class Complex {
     public void setImaginary(double imaginary) {
         this.imaginary = imaginary;
     }
+    
+    public String toString(){
+        return real + " + " + imaginary + "i";
+    }
 }

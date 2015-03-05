@@ -12,7 +12,7 @@ import javax.swing.JFrame;
 public class Mandelbrot extends JFrame {
  
     private final int MAX_ITER = 570;
-    private final double ZOOM = 1500;
+    private final double ZOOM = 150;
     private BufferedImage I;
     private double zx, zy, cX, cY, tmp;
  

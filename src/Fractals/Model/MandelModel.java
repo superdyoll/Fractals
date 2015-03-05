@@ -11,7 +11,7 @@ import Fractals.Maths.Complex;
  *
  * @author Lloyd
  */
-public class MandelModel extends AbstractModel{
+public class MandelModel{
     
     public int calculateMandelPoint (Complex point, int iterations){
         Complex zNumber = point;
