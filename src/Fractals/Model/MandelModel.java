@@ -11,27 +11,37 @@ import Fractals.Maths.Complex;
  *
  * @author Lloyd
  */
-public class MandelModel{
+public class MandelModel {
+
+    private double zx, zy, cX, cY, tmp;
     
-    public int calculateMandelPoint (Complex point, int iterations){
-        Complex zNumber = point;
-        while(iterations > 0 || zNumber.modulus() < 2){
-            zNumber = zNumber.square();
-            zNumber = zNumber.add(point);
-            iterations--;
+    public int calculateMandelPoint(Complex point, int iter) {
+        /*Complex zNumber = point;
+         while(iter > 0 && zNumber.modulus() < 2){
+         zNumber = zNumber.square();
+         zNumber = zNumber.add(point);
+         iterations--;
+         }*/
+        zx = zy = 0;
+        cX = point.getReal();
+        cY = point.getImaginary();
+        while (zx * zx + zy * zy < 4 && iter > 0) {
+            tmp = zx * zx - zy * zy + cX;
+            zy = 2.0 * zx * zy + cY;
+            zx = tmp;
+            iter--;
         }
-        return iterations;
+        return iter;
     }
-    
-    public int calculateJuliaPoint (Complex point, Complex fixed, int iterations){
+
+    public int calculateJuliaPoint(Complex point, Complex fixed, int iterations) {
         Complex zNumber = point.add(fixed);
-        while (iterations > 0 || zNumber.modulus() < 2){
+        while (iterations > 0 || zNumber.modulus() < 2) {
             zNumber = zNumber.square();
             zNumber = zNumber.add(fixed);
             iterations--;
         }
         return iterations;
     }
-    
-    
+
 }

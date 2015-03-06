@@ -26,7 +26,7 @@ public class MandelView extends JFrame{
         setResizable(false);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         System.out.println("Basic I frame things done");
-        I = control.drawMandel(getWidth(), getHeight(), 10, 150);
+        I = control.drawMandel(getWidth(), getHeight(), 570, 150);
         System.out.println("Image created");
     }
     
