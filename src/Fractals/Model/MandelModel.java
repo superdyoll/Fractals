@@ -14,23 +14,23 @@ import Fractals.Maths.Complex;
 public class MandelModel {
 
     private double zx, zy, cX, cY, tmp;
-    
+
     public int calculateMandelPoint(Complex point, int iter) {
-        /*Complex zNumber = point;
-         while(iter > 0 && zNumber.modulus() < 2){
-         zNumber = zNumber.square();
-         zNumber = zNumber.add(point);
-         iterations--;
-         }*/
-        zx = zy = 0;
-        cX = point.getReal();
-        cY = point.getImaginary();
-        while (zx * zx + zy * zy < 4 && iter > 0) {
-            tmp = zx * zx - zy * zy + cX;
-            zy = 2.0 * zx * zy + cY;
-            zx = tmp;
+        Complex zNumber = point;
+        while (iter > 0 && zNumber.modulus() < 2) {
+            zNumber = zNumber.square();
+            zNumber = zNumber.add(point);
             iter--;
         }
+        /*zx = zy = 0;
+         cX = point.getReal();
+         cY = point.getImaginary();
+         while (zx * zx + zy * zy < 4 && iter > 0) {
+         tmp = zx * zx - zy * zy + cX;
+         zy = 2.0 * zx * zy + cY;
+         zx = tmp;
+         iter--;
+         }*/
         return iter;
     }
 

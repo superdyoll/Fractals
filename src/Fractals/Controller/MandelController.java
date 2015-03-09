@@ -16,10 +16,6 @@ import java.awt.image.BufferedImage;
  */
 public class MandelController {
     
-    private final int MAX_ITER = 570;
-    private final double ZOOM = 150;
-    private BufferedImage I;
-    private double zx, zy, cX, cY, tmp;
 
     public BufferedImage drawMandel(int width, int height, int iterations, int zoom) {
         System.out.println("Drawing mandel");
@@ -27,14 +23,14 @@ public class MandelController {
         BufferedImage graph = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
         System.out.println("Image created");
         System.out.println(height + " heigh");
-        /*for (int y = 0; y < height; y++) {
+        for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
                 Complex point = new Complex((x-(width/2))/zoom, (y-(height/2))/zoom);
                 int iter = newMandel.calculateMandelPoint(point, iterations);
                 graph.setRGB(x, y, iter | (iter << 8));
             }
-        }*/
-        for (int y = 0; y < height; y++) {
+        }
+        /*for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
                 zx = zy = 0;
                 cX = (x - 400) / ZOOM;
@@ -48,7 +44,7 @@ public class MandelController {
                 }
                 graph.setRGB(x, y, iter | (iter << 8));
             }
-        }
+        }*/
         System.out.println("For loops finished");
         return graph;
     }
