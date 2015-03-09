@@ -17,20 +17,12 @@ public class MandelModel {
 
     public int calculateMandelPoint(Complex point, int iter) {
         Complex zNumber = point;
-        while (iter > 0 && zNumber.modulus() < 2) {
+        while (iter > 0 && zNumber.modulusSquared()< 4) {
+            //System.out.println(zNumber);
             zNumber = zNumber.square();
             zNumber = zNumber.add(point);
             iter--;
         }
-        /*zx = zy = 0;
-         cX = point.getReal();
-         cY = point.getImaginary();
-         while (zx * zx + zy * zy < 4 && iter > 0) {
-         tmp = zx * zx - zy * zy + cX;
-         zy = 2.0 * zx * zy + cY;
-         zx = tmp;
-         iter--;
-         }*/
         return iter;
     }
 
