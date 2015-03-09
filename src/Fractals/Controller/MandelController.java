@@ -8,19 +8,22 @@ package Fractals.Controller;
 import Fractals.Maths.Complex;
 import Fractals.Model.MandelModel;
 import Fractals.View.MandelView;
-import java.awt.Color;
+import java.awt.*;
 import java.awt.image.BufferedImage;
+import javax.swing.*;
 
 /**
  *
  * @author Lloyd
  */
-public class MandelController {
+public class MandelController{
 
     private Color[] colorMap;
+    private JLabel lblComplex = new JLabel();
 
     public BufferedImage drawMandel(int width, int height, int xCenter, int yCenter, int iterations, int zoom) {
         System.out.println("Drawing mandel");
+        System.out.println("width: " + width + "height: " + height);
         MandelModel newMandel = new MandelModel();
         BufferedImage graph = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
         System.out.println("Image created");
@@ -36,6 +39,10 @@ public class MandelController {
         }
         System.out.println("For loops finished");
         return graph;
+    }
+    
+    public void setComplex(String text){
+        lblComplex.setText(text);
     }
 
     public Color getColour(int maxIterations, int iter) {
@@ -92,17 +99,53 @@ public class MandelController {
                     c = new Color(106, 52, 3);
                     break;
                 default:
-                    c = new Color(0,0,0);
+                    c = new Color(255,255,255);
                     break;
             }
             return c;
-        } else {
+        } else if (iter == maxIterations){
+            return new Color (255,255,255);
+        }else{
             return new Color (0,0,0);
         }
     }
+    
+    public void drawStuff(){
+        //Basic Frame stuff
+        JFrame frmOuter = new JFrame ("Mandlebrot Set");
+        System.out.println("Titled");
+        frmOuter.setBounds(100, 100, 800, 600);
+        frmOuter.setResizable(false);
+        frmOuter.setDefaultCloseOperation(frmOuter.EXIT_ON_CLOSE);
+        
+        Container pnlMain = frmOuter.getContentPane();
+        pnlMain.setBounds(100, 100, frmOuter.getWidth(), frmOuter.getHeight());
+        
+        
+        //Make mandel panel
+        JPanel pnlMandel = new MandelView();
+        pnlMain.add(pnlMandel,BorderLayout.CENTER);
+        pnlMandel.setVisible(true);
+        
+        
+        lblComplex.setText("Click on a point to view the complex number");
+        
+        //Make complex point bit
+        JPanel pnlComplex = new JPanel();
+        pnlComplex.setBounds(100, 100, frmOuter.getWidth(), (int) (frmOuter.getHeight() * 0.01));      
+        pnlComplex.setLayout(new FlowLayout(FlowLayout.LEFT));
+        pnlComplex.add(lblComplex);
+        pnlMain.add(pnlComplex, BorderLayout.SOUTH);
+        pnlComplex.setVisible(true);
+        
+        //frmOuter.add(pnlMain, BorderLayout.CENTER);
+        //frmOuter.pack();
+        frmOuter.setVisible(true);
+    }
 
     public static void main(String[] args) {
-        new MandelView().setVisible(true);
+        MandelController mandel = new MandelController();
+        mandel.drawStuff();
     }
 
 }
