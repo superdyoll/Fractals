@@ -12,8 +12,6 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.Graphics;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
@@ -36,8 +34,8 @@ public class MandelController extends JPanel implements MouseListener, KeyListen
     private int zoom, xCenter, yCenter;
     private boolean juliaSet, mousePressed, imageDrawn;
     private Complex fixed;
-    private JButton btnZoomIn = new JButton("Zoom In");
-    private JButton btnZoomOut = new JButton("Zoom Out");
+    private JButton btnZoomIn;
+    private JButton btnZoomOut;
 
     public MandelController(MandelView controller) {
         this(controller, false, 150);
@@ -48,6 +46,8 @@ public class MandelController extends JPanel implements MouseListener, KeyListen
     }
 
     public MandelController(MandelView controller, boolean juliaSet, int zoom) {
+        this.btnZoomOut = new JButton("Zoom Out");
+        this.btnZoomIn = new JButton("Zoom In");
         this.juliaSet = juliaSet;
         setCurrentZoom(zoom);
         setBounds(100, 100, 800, 600);
@@ -75,9 +75,6 @@ public class MandelController extends JPanel implements MouseListener, KeyListen
 
         setImageDrawn(false);
 
-        //Just some debugging parts
-        //System.out.println("Drawing mandel");
-        //System.out.println("width: " + width + "height: " + height);
         //Make a new model
         MandelModel newMandel = new MandelModel();
 
@@ -107,7 +104,6 @@ public class MandelController extends JPanel implements MouseListener, KeyListen
                 graph.setRGB(x, y, rgb);
             }
         }
-        ////System.out.println("For loops finished");
         setImageDrawn(true);
         return graph;
     }
@@ -191,7 +187,6 @@ public class MandelController extends JPanel implements MouseListener, KeyListen
         yCenter = getHeight() / 2;
         I = MandelController.this.drawFractal(getWidth(), getHeight(), 570);
         g.drawImage(I, 0, 0, this);
-        ////System.out.println("Drawn");
         btnZoomIn.setVisible(true);
         btnZoomOut.setVisible(true);
     }
@@ -200,7 +195,6 @@ public class MandelController extends JPanel implements MouseListener, KeyListen
     public void mouseClicked(MouseEvent e) {
         if (!isJuliaSet()) {
             Complex point = new Complex(((float) (e.getX() - getCurrentXCenter()) / getCurrentZoom()), ((float) (e.getY() - getCurrentYCenter()) / getCurrentZoom()));
-            ////System.out.println("Pont Clicked" + point);
             view.setComplex(point);
         }
     }
@@ -303,7 +297,7 @@ public class MandelController extends JPanel implements MouseListener, KeyListen
     /**
      * @param currentZoom the zoom to set
      */
-    public void setCurrentZoom(int currentZoom) {
+    public final void setCurrentZoom(int currentZoom) {
         this.zoom = currentZoom;
     }
 
