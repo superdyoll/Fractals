@@ -31,22 +31,37 @@ public class MandelView extends JPanel implements MouseListener{
         control = controller;
     }
     
-    public BufferedImage drawMandel(int width, int height, int xCenter, int yCenter, int iterations, int zoom) {
+    public BufferedImage drawMandel(int width, int height, int xCenter, int yCenter, int maxIterations, int zoom) {
+        //Set member variables
         currentZoom = zoom;
         currentXCenter = xCenter;
         currentYCenter = yCenter;
+        
+        //Just some debugging parts
         System.out.println("Drawing mandel");
         System.out.println("width: " + width + "height: " + height);
+        
+        //Make a new model
         MandelModel newMandel = new MandelModel();
+        
+        //Create the new image for double buffering
         BufferedImage graph = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
         System.out.println("Image created");
-        System.out.println(height + " heigh");
+        
+        //Do the calculation
+        //Go through height
         for (int y = 0; y < height; y++) {
+            //Go through width
             for (int x = 0; x < width; x++) {
+                //Make new Complex point
                 Complex point = new Complex(((float) (x - xCenter) / zoom), ((float) (y - yCenter) / zoom));
-                int iter = newMandel.calculateMandelPoint(point, iterations);
-                Color c = getColour(iterations, iter);
+                //Work out the iterations taken diverge
+                int iter = newMandel.calculateMandelPoint(point, maxIterations);
+                //Get the colour from the colour map
+                Color c = getColour(maxIterations, iter);
+                //Get the RGB
                 int rgb = c.getRGB();
+                //Add the point on the image
                 graph.setRGB(x, y, rgb);
             }
         }
@@ -54,6 +69,12 @@ public class MandelView extends JPanel implements MouseListener{
         return graph;
     }
     
+    /**Returns the colour according to the colour map similar to the wikipedia image
+     *
+     * @param maxIterations
+     * @param iter
+     * @return
+     */
     public Color getColour(int maxIterations, int iter) {
         if (iter < maxIterations && iter > 0) {
             int i = iter % 16;
