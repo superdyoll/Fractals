@@ -29,12 +29,12 @@ import javax.swing.JPanel;
  *
  * @author Lloyd
  */
-public class MandelController extends JPanel implements MouseListener, KeyListener{
+public class MandelController extends JPanel implements MouseListener, KeyListener {
 
     private final MandelView view;
     private BufferedImage I;
     private int zoom, xCenter, yCenter;
-    private boolean juliaSet, mousePressed;
+    private boolean juliaSet, mousePressed, imageDrawn;
     private Complex fixed;
     private JButton btnZoomIn = new JButton("Zoom In");
     private JButton btnZoomOut = new JButton("Zoom Out");
@@ -73,10 +73,11 @@ public class MandelController extends JPanel implements MouseListener, KeyListen
 
     public BufferedImage drawFractal(int width, int height, int maxIterations) {
 
+        setImageDrawn(false);
+
         //Just some debugging parts
         //System.out.println("Drawing mandel");
         //System.out.println("width: " + width + "height: " + height);
-
         //Make a new model
         MandelModel newMandel = new MandelModel();
 
@@ -107,6 +108,7 @@ public class MandelController extends JPanel implements MouseListener, KeyListen
             }
         }
         ////System.out.println("For loops finished");
+        setImageDrawn(true);
         return graph;
     }
 
@@ -215,11 +217,14 @@ public class MandelController extends JPanel implements MouseListener, KeyListen
                     } else if (src == btnZoomOut) {
                         zoom -= zoom * 0.1;
                     }
+                    setImageDrawn(false);
                     repaint();
-                    try {
-                        sleep(500);
-                    } catch (InterruptedException ex) {
-                        Logger.getLogger(MandelController.class.getName()).log(Level.SEVERE, null, ex);
+                    while (!isImageDrawn()) {
+                        try {
+                            sleep(100);
+                        } catch (InterruptedException ex) {
+                            Logger.getLogger(MandelController.class.getName()).log(Level.SEVERE, null, ex);
+                        }
                     }
                 }
             }
@@ -331,14 +336,27 @@ public class MandelController extends JPanel implements MouseListener, KeyListen
     }
 
     /*@Override
-    public void actionPerformed(ActionEvent e) {
-        Object src = e.getSource();
-        if (src == btnZoomIn) {
-            zoom += 10;
-        } else if (src == btnZoomOut) {
-            zoom -= 10;
-        }
-        repaint();
-    }*/
+     public void actionPerformed(ActionEvent e) {
+     Object src = e.getSource();
+     if (src == btnZoomIn) {
+     zoom += 10;
+     } else if (src == btnZoomOut) {
+     zoom -= 10;
+     }
+     repaint();
+     }*/
+    /**
+     * @return the imageDrawn
+     */
+    public boolean isImageDrawn() {
+        return imageDrawn;
+    }
+
+    /**
+     * @param imageDrawn the imageDrawn to set
+     */
+    public void setImageDrawn(boolean imageDrawn) {
+        this.imageDrawn = imageDrawn;
+    }
 
 }
