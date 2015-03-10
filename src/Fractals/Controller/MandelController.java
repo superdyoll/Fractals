@@ -38,6 +38,7 @@ public class MandelController extends JPanel implements MouseListener, KeyListen
     private Complex fixed;
     private JButton btnZoomIn = new JButton("Zoom In");
     private JButton btnZoomOut = new JButton("Zoom Out");
+    private JLayeredPane layers;
 
     public MandelController(MandelView controller) {
         this(controller, false, 150);
@@ -49,18 +50,19 @@ public class MandelController extends JPanel implements MouseListener, KeyListen
 
     public MandelController(MandelView controller, boolean juliaSet, int zoom) {
         this.juliaSet = juliaSet;
-        setCurrentZoom(zoom);
+        setZoom(zoom);
         setBounds(100, 100, 800, 600);
 
         //Make a navigation panel        
         btnZoomIn.addMouseListener(this);
         btnZoomOut.addMouseListener(this);
 
-        JLayeredPane pnlNav = new JLayeredPane();
+        JPanel pnlNav = new JPanel();
         pnlNav.setLayout(new FlowLayout(FlowLayout.RIGHT));
         pnlNav.add(btnZoomIn);
         pnlNav.add(btnZoomOut);
-        this.add(pnlNav, BorderLayout.NORTH);
+        layers.add(pnlNav, 0);
+        this.add(layers, BorderLayout.NORTH);
         pnlNav.setVisible(true);
 
         addMouseListener(this);
@@ -91,7 +93,7 @@ public class MandelController extends JPanel implements MouseListener, KeyListen
             //Go through width
             for (int x = 0; x < width; x++) {
                 //Make new Complex point
-                Complex point = new Complex(((float) (x - xCenter) / getCurrentZoom()), ((float) (y - yCenter) / getCurrentZoom()));
+                Complex point = new Complex(((float) (x - xCenter) / getZoom()), ((float) (y - yCenter) / getZoom()));
                 //Work out the iterations taken diverge
                 int iter;
                 if (isJuliaSet()) {
@@ -199,7 +201,7 @@ public class MandelController extends JPanel implements MouseListener, KeyListen
     @Override
     public void mouseClicked(MouseEvent e) {
         if (!isJuliaSet()) {
-            Complex point = new Complex(((float) (e.getX() - getCurrentXCenter()) / getCurrentZoom()), ((float) (e.getY() - getCurrentYCenter()) / getCurrentZoom()));
+            Complex point = new Complex(((float) (e.getX() - getXCenter()) / getZoom()), ((float) (e.getY() - getYCenter()) / getZoom()));
             ////System.out.println("Pont Clicked" + point);
             view.setComplex(point);
         }
@@ -213,9 +215,9 @@ public class MandelController extends JPanel implements MouseListener, KeyListen
             public void run() {
                 while (mousePressed) {
                     if (src == btnZoomIn) {
-                        zoom += zoom * 0.1;
+                        setZoom(getZoom() + (getZoom()* 0.1));
                     } else if (src == btnZoomOut) {
-                        zoom -= zoom * 0.1;
+                        setZoom(getZoom() + (getZoom()* 0.1));
                     }
                     setImageDrawn(false);
                     repaint();
@@ -296,42 +298,44 @@ public class MandelController extends JPanel implements MouseListener, KeyListen
     /**
      * @return the zoom
      */
-    public int getCurrentZoom() {
+    public int getZoom() {
         return zoom;
     }
 
     /**
      * @param currentZoom the zoom to set
      */
-    public void setCurrentZoom(int currentZoom) {
-        this.zoom = currentZoom;
+    public void setZoom(int currentZoom) {
+        if (currentZoom > 0){
+            this.zoom = currentZoom;
+        }
     }
 
     /**
      * @return the xCenter
      */
-    public int getCurrentXCenter() {
+    public int getXCenter() {
         return xCenter;
     }
 
     /**
      * @param currentXCenter the xCenter to set
      */
-    public void setCurrentXCenter(int currentXCenter) {
+    public void setXCenter(int currentXCenter) {
         this.xCenter = currentXCenter;
     }
 
     /**
      * @return the yCenter
      */
-    public int getCurrentYCenter() {
+    public int getYCenter() {
         return yCenter;
     }
 
     /**
      * @param currentYCenter the yCenter to set
      */
-    public void setCurrentYCenter(int currentYCenter) {
+    public void setYCenter(int currentYCenter) {
         this.yCenter = currentYCenter;
     }
 
