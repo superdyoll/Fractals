@@ -12,11 +12,15 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.Graphics;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JButton;
 import javax.swing.JLayeredPane;
 import javax.swing.JPanel;
@@ -25,13 +29,15 @@ import javax.swing.JPanel;
  *
  * @author Lloyd
  */
-public class MandelController extends JPanel implements MouseListener, KeyListener {
+public class MandelController extends JPanel implements MouseListener, KeyListener{
 
     private final MandelView view;
     private BufferedImage I;
     private int zoom, xCenter, yCenter;
-    private boolean juliaSet;
+    private boolean juliaSet, mousePressed;
     private Complex fixed;
+    private JButton btnZoomIn = new JButton("Zoom In");
+    private JButton btnZoomOut = new JButton("Zoom Out");
 
     public MandelController(MandelView controller) {
         this(controller, false, 150);
@@ -45,18 +51,18 @@ public class MandelController extends JPanel implements MouseListener, KeyListen
         this.juliaSet = juliaSet;
         setCurrentZoom(zoom);
         setBounds(100, 100, 800, 600);
-        
+
         //Make a navigation panel        
-        JButton btnZoomIn = new JButton ("Zoom In");
-        JButton btnZoomOut = new JButton ("Zoom Out");
-        
+        btnZoomIn.addMouseListener(this);
+        btnZoomOut.addMouseListener(this);
+
         JLayeredPane pnlNav = new JLayeredPane();
         pnlNav.setLayout(new FlowLayout(FlowLayout.RIGHT));
         pnlNav.add(btnZoomIn);
         pnlNav.add(btnZoomOut);
         this.add(pnlNav, BorderLayout.NORTH);
         pnlNav.setVisible(true);
-        
+
         addMouseListener(this);
         addKeyListener(this);
         view = controller;
@@ -177,7 +183,7 @@ public class MandelController extends JPanel implements MouseListener, KeyListen
 
     @Override
     public void paint(Graphics g) {
-        xCenter =  getWidth() / 2;
+        xCenter = getWidth() / 2;
         yCenter = getHeight() / 2;
         I = MandelController.this.drawFractal(getWidth(), getHeight(), 570);
         g.drawImage(I, 0, 0, this);
@@ -195,12 +201,31 @@ public class MandelController extends JPanel implements MouseListener, KeyListen
 
     @Override
     public void mousePressed(MouseEvent e) {
-        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        mousePressed = true;
+        Object src = e.getSource();
+        new Thread() {
+            public void run() {
+                while (mousePressed) {
+                    if (src == btnZoomIn) {
+                        zoom += 10;
+                    } else if (src == btnZoomOut) {
+                        zoom -= 10;
+                    }
+                    repaint();
+                    try {
+                        sleep(500);
+                    } catch (InterruptedException ex) {
+                        Logger.getLogger(MandelController.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+            }
+
+        }.start();
     }
 
     @Override
     public void mouseReleased(MouseEvent e) {
-        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        mousePressed = false;
     }
 
     @Override
@@ -300,5 +325,16 @@ public class MandelController extends JPanel implements MouseListener, KeyListen
     public void setCurrentYCenter(int currentYCenter) {
         this.yCenter = currentYCenter;
     }
+
+    /*@Override
+    public void actionPerformed(ActionEvent e) {
+        Object src = e.getSource();
+        if (src == btnZoomIn) {
+            zoom += 10;
+        } else if (src == btnZoomOut) {
+            zoom -= 10;
+        }
+        repaint();
+    }*/
 
 }
