@@ -18,15 +18,13 @@ import javax.swing.*;
  */
 public class MandelController{
 
-    private JLabel lblComplex = new JLabel();
+    private final JLabel lblComplex = new JLabel();
 
-    
     
     public void setComplex(String text){
         lblComplex.setText(text);
     }
 
-    
     
     public void drawStuff(){
         //Basic Frame stuff

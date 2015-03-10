@@ -10,6 +10,8 @@ import Fractals.Controller.MandelController;
 import Fractals.Model.MandelModel;
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
@@ -20,14 +22,15 @@ import javax.swing.JPanel;
  *
  * @author Lloyd
  */
-public class MandelView extends JPanel implements MouseListener{
-    private MandelController control;
+public class MandelView extends JPanel implements MouseListener , KeyListener{
+    private final MandelController control;
     private BufferedImage I;
     private int currentZoom, currentXCenter, currentYCenter;
     
     public MandelView(MandelController controller){
         setBounds(100, 100, 800, 600);
         addMouseListener(this);
+        addKeyListener(this);
         control = controller;
     }
     
@@ -171,6 +174,24 @@ public class MandelView extends JPanel implements MouseListener{
 
     @Override
     public void mouseExited(MouseEvent e) {
+        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void keyTyped(KeyEvent e) {
+        System.out.println("Key Typed: " + e.getKeyChar());
+        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void keyPressed(KeyEvent e) {
+        System.out.println("Key Pressed: " + e.getKeyChar());
+        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void keyReleased(KeyEvent e) {
+        System.out.println("Key Released: " + e.getKeyChar());
         //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     
