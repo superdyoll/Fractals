@@ -8,57 +8,88 @@ package Fractals.Controller;
 import Fractals.Maths.Complex;
 import Fractals.View.MandelView;
 import Fractals.Model.MandelModel;
+import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.FlowLayout;
 import java.awt.Graphics;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
+import javax.swing.JButton;
+import javax.swing.JLayeredPane;
 import javax.swing.JPanel;
 
 /**
  *
  * @author Lloyd
  */
-public class MandelController extends JPanel implements MouseListener , KeyListener{
-    private final MandelView control;
+public class MandelController extends JPanel implements MouseListener, KeyListener {
+
+    private final MandelView view;
     private BufferedImage I;
-    private int currentZoom, currentXCenter, currentYCenter;
-    
-    public MandelController(MandelView controller){
+    private int zoom, xCenter, yCenter;
+    private boolean juliaSet;
+    private Complex fixed;
+
+    public MandelController(MandelView controller) {
+        this(controller, false, 150);
+    }
+
+    public MandelController(MandelView controller, boolean juliaSet) {
+        this(controller, juliaSet, 150);
+    }
+
+    public MandelController(MandelView controller, boolean juliaSet, int zoom) {
+        this.juliaSet = juliaSet;
+        setCurrentZoom(zoom);
         setBounds(100, 100, 800, 600);
+        
+        //Make a navigation panel        
+        JButton btnZoomIn = new JButton ("Zoom In");
+        JButton btnZoomOut = new JButton ("Zoom Out");
+        
+        JLayeredPane pnlNav = new JLayeredPane();
+        pnlNav.setLayout(new FlowLayout(FlowLayout.RIGHT));
+        pnlNav.add(btnZoomIn);
+        pnlNav.add(btnZoomOut);
+        this.add(pnlNav, BorderLayout.NORTH);
+        pnlNav.setVisible(true);
+        
         addMouseListener(this);
         addKeyListener(this);
-        control = controller;
+        view = controller;
+        fixed = new Complex(0, 0);
     }
-    
-    public BufferedImage drawMandel(int width, int height, int xCenter, int yCenter, int maxIterations, int zoom) {
-        //Set member variables
-        currentZoom = zoom;
-        currentXCenter = xCenter;
-        currentYCenter = yCenter;
-        
+
+    public BufferedImage drawFractal(int width, int height, int maxIterations) {
+
         //Just some debugging parts
         System.out.println("Drawing mandel");
         System.out.println("width: " + width + "height: " + height);
-        
+
         //Make a new model
         MandelModel newMandel = new MandelModel();
-        
+
         //Create the new image for double buffering
         BufferedImage graph = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
         System.out.println("Image created");
-        
+
         //Do the calculation
         //Go through height
         for (int y = 0; y < height; y++) {
             //Go through width
             for (int x = 0; x < width; x++) {
                 //Make new Complex point
-                Complex point = new Complex(((float) (x - xCenter) / zoom), ((float) (y - yCenter) / zoom));
+                Complex point = new Complex(((float) (x - xCenter) / getCurrentZoom()), ((float) (y - yCenter) / getCurrentZoom()));
                 //Work out the iterations taken diverge
-                int iter = newMandel.calculateMandelPoint(point, maxIterations);
+                int iter;
+                if (isJuliaSet()) {
+                    iter = newMandel.calculateJuliaPoint(point, getFixed(), maxIterations);
+                } else {
+                    iter = newMandel.calculateMandelPoint(point, maxIterations);
+                }
                 //Get the colour from the colour map
                 Color c = getColour(maxIterations, iter);
                 //Get the RGB
@@ -70,8 +101,10 @@ public class MandelController extends JPanel implements MouseListener , KeyListe
         System.out.println("For loops finished");
         return graph;
     }
-    
-    /**Returns the colour according to the colour map similar to the wikipedia image
+
+    /**
+     * Returns the colour according to the colour map similar to the wikipedia
+     * image
      *
      * @param maxIterations
      * @param iter
@@ -131,29 +164,33 @@ public class MandelController extends JPanel implements MouseListener , KeyListe
                     c = new Color(106, 52, 3);
                     break;
                 default:
-                    c = new Color(255,255,255);
+                    c = new Color(255, 255, 255);
                     break;
             }
             return c;
-        } else if (iter == maxIterations){
-            return new Color (255,255,255);
-        }else{
-            return new Color (0,0,0);
+        } else if (iter == maxIterations) {
+            return new Color(255, 255, 255);
+        } else {
+            return new Color(0, 0, 0);
         }
     }
-    
+
     @Override
     public void paint(Graphics g) {
-        I = drawMandel(getWidth(), getHeight(), getWidth()/2, getHeight()/2, 570 , 150);
+        xCenter =  getWidth() / 2;
+        yCenter = getHeight() / 2;
+        I = MandelController.this.drawFractal(getWidth(), getHeight(), 570);
         g.drawImage(I, 0, 0, this);
         System.out.println("Drawn");
     }
 
     @Override
     public void mouseClicked(MouseEvent e) {
-        Complex point = new Complex(((float) (e.getX() - currentXCenter) / currentZoom), ((float) (e.getY() - currentYCenter) / currentZoom));
-        System.out.println("Pont Clicked" + point);
-        control.setComplex(point.toString());
+        if (!isJuliaSet()) {
+            Complex point = new Complex(((float) (e.getX() - getCurrentXCenter()) / getCurrentZoom()), ((float) (e.getY() - getCurrentYCenter()) / getCurrentZoom()));
+            System.out.println("Pont Clicked" + point);
+            view.setComplex(point);
+        }
     }
 
     @Override
@@ -193,5 +230,75 @@ public class MandelController extends JPanel implements MouseListener , KeyListe
         System.out.println("Key Released: " + e.getKeyChar());
         //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
-    
+
+    /**
+     * @return the juliaSet
+     */
+    public boolean isJuliaSet() {
+        return juliaSet;
+    }
+
+    /**
+     * @param juliaSet the juliaSet to set
+     */
+    public void setJuliaSet(boolean juliaSet) {
+        this.juliaSet = juliaSet;
+    }
+
+    /**
+     * @return the fixed
+     */
+    public Complex getFixed() {
+        return fixed;
+    }
+
+    /**
+     * @param fixed the fixed to set
+     */
+    public void setFixed(Complex fixed) {
+        this.fixed = fixed;
+    }
+
+    /**
+     * @return the zoom
+     */
+    public int getCurrentZoom() {
+        return zoom;
+    }
+
+    /**
+     * @param currentZoom the zoom to set
+     */
+    public void setCurrentZoom(int currentZoom) {
+        this.zoom = currentZoom;
+    }
+
+    /**
+     * @return the xCenter
+     */
+    public int getCurrentXCenter() {
+        return xCenter;
+    }
+
+    /**
+     * @param currentXCenter the xCenter to set
+     */
+    public void setCurrentXCenter(int currentXCenter) {
+        this.xCenter = currentXCenter;
+    }
+
+    /**
+     * @return the yCenter
+     */
+    public int getCurrentYCenter() {
+        return yCenter;
+    }
+
+    /**
+     * @param currentYCenter the yCenter to set
+     */
+    public void setCurrentYCenter(int currentYCenter) {
+        this.yCenter = currentYCenter;
+    }
+
 }

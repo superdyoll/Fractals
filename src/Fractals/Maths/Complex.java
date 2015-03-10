@@ -15,8 +15,8 @@ public class Complex {
     private double imaginary;
     
     public Complex (double real, double imaginary){
-        this.real = real;
-        this.imaginary = imaginary;
+        this.real = (float) real;
+        this.imaginary = (float) imaginary;
     }
     
     public Complex square(){

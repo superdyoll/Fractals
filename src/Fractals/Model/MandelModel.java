@@ -13,8 +13,6 @@ import Fractals.Maths.Complex;
  */
 public class MandelModel {
 
-    private double zx, zy, cX, cY, tmp;
-
     public int calculateMandelPoint(Complex point, int iter) {
         Complex zNumber = point;
         while (iter > 0 && zNumber.modulusSquared()< 4) {
@@ -26,14 +24,14 @@ public class MandelModel {
         return iter;
     }
 
-    public int calculateJuliaPoint(Complex point, Complex fixed, int iterations) {
+    public int calculateJuliaPoint(Complex point, Complex fixed, int iter) {
         Complex zNumber = point.add(fixed);
-        while (iterations > 0 || zNumber.modulus() < 2) {
+        while (iter > 0 && zNumber.modulusSquared() < 4) {
             zNumber = zNumber.square();
             zNumber = zNumber.add(fixed);
-            iterations--;
+            iter--;
         }
-        return iterations;
+        return iter;
     }
 
 }

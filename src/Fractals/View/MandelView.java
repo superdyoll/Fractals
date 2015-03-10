@@ -7,10 +7,7 @@ package Fractals.View;
 
 import Fractals.Controller.MandelController;
 import Fractals.Maths.Complex;
-import Fractals.Model.MandelModel;
-import Fractals.Controller.MandelController;
 import java.awt.*;
-import java.awt.image.BufferedImage;
 import javax.swing.*;
 
 /**
@@ -20,10 +17,13 @@ import javax.swing.*;
 public class MandelView{
 
     private final JLabel lblComplex = new JLabel();
+    private MandelController pnlJulia;
 
     
-    public void setComplex(String text){
-        lblComplex.setText(text);
+    public void setComplex(Complex point){
+        lblComplex.setText(point.toString());
+        pnlJulia.setFixed(point);
+        pnlJulia.repaint();
     }
 
     
@@ -32,7 +32,6 @@ public class MandelView{
         JFrame frmOuter = new JFrame ("Mandlebrot Set");
         System.out.println("Titled");
         frmOuter.setBounds(100, 100, 800, 600);
-        frmOuter.setResizable(false);
         frmOuter.setDefaultCloseOperation(frmOuter.EXIT_ON_CLOSE);
         
         Container pnlMain = frmOuter.getContentPane();
@@ -44,7 +43,6 @@ public class MandelView{
         pnlMain.add(pnlMandel,BorderLayout.CENTER);
         pnlMandel.setVisible(true);
         
-        
         lblComplex.setText("Click on a point to view the complex number");
         
         //Make complex point bit
@@ -55,9 +53,25 @@ public class MandelView{
         pnlMain.add(pnlComplex, BorderLayout.SOUTH);
         pnlComplex.setVisible(true);
         
+        
+        
         //frmOuter.add(pnlMain, BorderLayout.CENTER);
         //frmOuter.pack();
         frmOuter.setVisible(true);
+        
+        //Make Julia frame
+        JFrame frmJulia = new JFrame ("Julia Set");
+        System.out.println("Titled");
+        frmJulia.setBounds(100, 100, 400, 300);
+        
+        Container pnlJuliaMain = frmJulia.getContentPane();
+        
+        //Make mandel panel
+        pnlJulia = new MandelController(this, true, 50);
+        pnlJuliaMain.add(pnlJulia,BorderLayout.CENTER);
+        pnlJulia.setVisible(true);
+        
+        frmJulia.setVisible(true);
     }
 
     public static void main(String[] args) {
