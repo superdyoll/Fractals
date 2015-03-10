@@ -121,7 +121,7 @@ public class MandelView extends JPanel implements MouseListener{
     
     @Override
     public void paint(Graphics g) {
-        drawMandel(getWidth(), getHeight(), getWidth()/2, getHeight()/2, 570 , 150);
+        I = drawMandel(getWidth(), getHeight(), getWidth()/2, getHeight()/2, 570 , 150);
         g.drawImage(I, 0, 0, this);
         System.out.println("Drawn");
     }
