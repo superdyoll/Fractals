@@ -6,62 +6,192 @@
 package Fractals.Controller;
 
 import Fractals.Maths.Complex;
-import Fractals.Model.MandelModel;
 import Fractals.View.MandelView;
-import java.awt.*;
+import Fractals.Model.MandelModel;
+import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
-import javax.swing.*;
+import javax.swing.JPanel;
 
 /**
  *
  * @author Lloyd
  */
-public class MandelController{
-
-    private final JLabel lblComplex = new JLabel();
-
+public class MandelController extends JPanel implements MouseListener , KeyListener{
+    private final MandelView control;
+    private BufferedImage I;
+    private int currentZoom, currentXCenter, currentYCenter;
     
-    public void setComplex(String text){
-        lblComplex.setText(text);
+    public MandelController(MandelView controller){
+        setBounds(100, 100, 800, 600);
+        addMouseListener(this);
+        addKeyListener(this);
+        control = controller;
     }
-
     
-    public void drawStuff(){
-        //Basic Frame stuff
-        JFrame frmOuter = new JFrame ("Mandlebrot Set");
-        System.out.println("Titled");
-        frmOuter.setBounds(100, 100, 800, 600);
-        frmOuter.setResizable(false);
-        frmOuter.setDefaultCloseOperation(frmOuter.EXIT_ON_CLOSE);
+    public BufferedImage drawMandel(int width, int height, int xCenter, int yCenter, int maxIterations, int zoom) {
+        //Set member variables
+        currentZoom = zoom;
+        currentXCenter = xCenter;
+        currentYCenter = yCenter;
         
-        Container pnlMain = frmOuter.getContentPane();
-        pnlMain.setBounds(100, 100, frmOuter.getWidth(), frmOuter.getHeight());
+        //Just some debugging parts
+        System.out.println("Drawing mandel");
+        System.out.println("width: " + width + "height: " + height);
         
+        //Make a new model
+        MandelModel newMandel = new MandelModel();
         
-        //Make mandel panel
-        JPanel pnlMandel = new MandelView(this);
-        pnlMain.add(pnlMandel,BorderLayout.CENTER);
-        pnlMandel.setVisible(true);
+        //Create the new image for double buffering
+        BufferedImage graph = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+        System.out.println("Image created");
         
-        
-        lblComplex.setText("Click on a point to view the complex number");
-        
-        //Make complex point bit
-        JPanel pnlComplex = new JPanel();
-        pnlComplex.setBounds(100, 100, frmOuter.getWidth(), (int) (frmOuter.getHeight() * 0.01));      
-        pnlComplex.setLayout(new FlowLayout(FlowLayout.LEFT));
-        pnlComplex.add(lblComplex);
-        pnlMain.add(pnlComplex, BorderLayout.SOUTH);
-        pnlComplex.setVisible(true);
-        
-        //frmOuter.add(pnlMain, BorderLayout.CENTER);
-        //frmOuter.pack();
-        frmOuter.setVisible(true);
+        //Do the calculation
+        //Go through height
+        for (int y = 0; y < height; y++) {
+            //Go through width
+            for (int x = 0; x < width; x++) {
+                //Make new Complex point
+                Complex point = new Complex(((float) (x - xCenter) / zoom), ((float) (y - yCenter) / zoom));
+                //Work out the iterations taken diverge
+                int iter = newMandel.calculateMandelPoint(point, maxIterations);
+                //Get the colour from the colour map
+                Color c = getColour(maxIterations, iter);
+                //Get the RGB
+                int rgb = c.getRGB();
+                //Add the point on the image
+                graph.setRGB(x, y, rgb);
+            }
+        }
+        System.out.println("For loops finished");
+        return graph;
+    }
+    
+    /**Returns the colour according to the colour map similar to the wikipedia image
+     *
+     * @param maxIterations
+     * @param iter
+     * @return
+     */
+    public Color getColour(int maxIterations, int iter) {
+        if (iter < maxIterations && iter > 0) {
+            int i = iter % 16;
+            Color c;
+            switch (i) {
+                case 0:
+                    c = new Color(66, 30, 15);
+                    break;
+                case 1:
+                    c = new Color(25, 7, 26);
+                    break;
+                case 2:
+                    c = new Color(9, 1, 47);
+                    break;
+                case 3:
+                    c = new Color(4, 4, 73);
+                    break;
+                case 4:
+                    c = new Color(0, 7, 100);
+                    break;
+                case 5:
+                    c = new Color(12, 44, 138);
+                    break;
+                case 6:
+                    c = new Color(24, 82, 177);
+                    break;
+                case 7:
+                    c = new Color(57, 125, 209);
+                    break;
+                case 8:
+                    c = new Color(134, 181, 229);
+                    break;
+                case 9:
+                    c = new Color(211, 236, 248);
+                    break;
+                case 10:
+                    c = new Color(241, 233, 191);
+                    break;
+                case 11:
+                    c = new Color(248, 201, 95);
+                    break;
+                case 12:
+                    c = new Color(255, 170, 0);
+                    break;
+                case 13:
+                    c = new Color(204, 128, 0);
+                    break;
+                case 14:
+                    c = new Color(153, 87, 0);
+                    break;
+                case 15:
+                    c = new Color(106, 52, 3);
+                    break;
+                default:
+                    c = new Color(255,255,255);
+                    break;
+            }
+            return c;
+        } else if (iter == maxIterations){
+            return new Color (255,255,255);
+        }else{
+            return new Color (0,0,0);
+        }
+    }
+    
+    @Override
+    public void paint(Graphics g) {
+        I = drawMandel(getWidth(), getHeight(), getWidth()/2, getHeight()/2, 570 , 150);
+        g.drawImage(I, 0, 0, this);
+        System.out.println("Drawn");
     }
 
-    public static void main(String[] args) {
-        MandelController mandel = new MandelController();
-        mandel.drawStuff();
+    @Override
+    public void mouseClicked(MouseEvent e) {
+        Complex point = new Complex(((float) (e.getX() - currentXCenter) / currentZoom), ((float) (e.getY() - currentYCenter) / currentZoom));
+        System.out.println("Pont Clicked" + point);
+        control.setComplex(point.toString());
     }
 
+    @Override
+    public void mousePressed(MouseEvent e) {
+        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void mouseReleased(MouseEvent e) {
+        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void mouseEntered(MouseEvent e) {
+        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void mouseExited(MouseEvent e) {
+        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void keyTyped(KeyEvent e) {
+        System.out.println("Key Typed: " + e.getKeyChar());
+        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void keyPressed(KeyEvent e) {
+        System.out.println("Key Pressed: " + e.getKeyChar());
+        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void keyReleased(KeyEvent e) {
+        System.out.println("Key Released: " + e.getKeyChar());
+        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+    
 }
