@@ -67,20 +67,22 @@ public class MandelController extends JPanel implements MouseListener, KeyListen
         addKeyListener(this);
         view = controller;
         fixed = new Complex(0, 0);
+        btnZoomIn.setVisible(true);
+        btnZoomOut.setVisible(true);
     }
 
     public BufferedImage drawFractal(int width, int height, int maxIterations) {
 
         //Just some debugging parts
-        System.out.println("Drawing mandel");
-        System.out.println("width: " + width + "height: " + height);
+        //System.out.println("Drawing mandel");
+        //System.out.println("width: " + width + "height: " + height);
 
         //Make a new model
         MandelModel newMandel = new MandelModel();
 
         //Create the new image for double buffering
         BufferedImage graph = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-        System.out.println("Image created");
+        //System.out.println("Image created");
 
         //Do the calculation
         //Go through height
@@ -104,7 +106,7 @@ public class MandelController extends JPanel implements MouseListener, KeyListen
                 graph.setRGB(x, y, rgb);
             }
         }
-        System.out.println("For loops finished");
+        ////System.out.println("For loops finished");
         return graph;
     }
 
@@ -187,14 +189,16 @@ public class MandelController extends JPanel implements MouseListener, KeyListen
         yCenter = getHeight() / 2;
         I = MandelController.this.drawFractal(getWidth(), getHeight(), 570);
         g.drawImage(I, 0, 0, this);
-        System.out.println("Drawn");
+        ////System.out.println("Drawn");
+        btnZoomIn.setVisible(true);
+        btnZoomOut.setVisible(true);
     }
 
     @Override
     public void mouseClicked(MouseEvent e) {
         if (!isJuliaSet()) {
             Complex point = new Complex(((float) (e.getX() - getCurrentXCenter()) / getCurrentZoom()), ((float) (e.getY() - getCurrentYCenter()) / getCurrentZoom()));
-            System.out.println("Pont Clicked" + point);
+            ////System.out.println("Pont Clicked" + point);
             view.setComplex(point);
         }
     }
@@ -202,14 +206,14 @@ public class MandelController extends JPanel implements MouseListener, KeyListen
     @Override
     public void mousePressed(MouseEvent e) {
         mousePressed = true;
-        Object src = e.getSource();
+        final Object src = e.getSource();
         new Thread() {
             public void run() {
                 while (mousePressed) {
                     if (src == btnZoomIn) {
-                        zoom += 10;
+                        zoom += zoom * 0.1;
                     } else if (src == btnZoomOut) {
-                        zoom -= 10;
+                        zoom -= zoom * 0.1;
                     }
                     repaint();
                     try {
@@ -240,19 +244,19 @@ public class MandelController extends JPanel implements MouseListener, KeyListen
 
     @Override
     public void keyTyped(KeyEvent e) {
-        System.out.println("Key Typed: " + e.getKeyChar());
+        //System.out.println("Key Typed: " + e.getKeyChar());
         //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
     public void keyPressed(KeyEvent e) {
-        System.out.println("Key Pressed: " + e.getKeyChar());
+        //System.out.println("Key Pressed: " + e.getKeyChar());
         //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
     public void keyReleased(KeyEvent e) {
-        System.out.println("Key Released: " + e.getKeyChar());
+        //System.out.println("Key Released: " + e.getKeyChar());
         //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
