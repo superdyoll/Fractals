@@ -27,12 +27,10 @@ public class MandelController extends JPanel implements MouseListener, KeyListen
     private final MandelView view;
     private BufferedImage I;
     private int zoom, xCenter, yCenter, iterations;
-    private boolean juliaSet, mousePressed, imageDrawn;
+    private boolean juliaSet, imageDrawn;
     private Complex fixed;
 
-    private JLayeredPane layers;
-    private JButton btnZoomIn;
-    private JButton btnZoomOut;
+    
 
     public MandelController(MandelView controller) {
         this(controller, false, 150);
@@ -43,32 +41,17 @@ public class MandelController extends JPanel implements MouseListener, KeyListen
     }
 
     public MandelController(MandelView controller, boolean juliaSet, int zoom) {
-        iterations = 100;
+        iterations = 570;
         
-        this.btnZoomOut = new JButton("Zoom Out");
-        this.btnZoomIn = new JButton("Zoom In");
         this.juliaSet = juliaSet;
         setZoom(zoom);
         setBounds(100, 100, 800, 600);
-
-        //Make a navigation panel        
-        btnZoomIn.addMouseListener(this);
-        btnZoomOut.addMouseListener(this);
-
-        JPanel pnlNav = new JPanel();
-        pnlNav.setLayout(new FlowLayout(FlowLayout.RIGHT));
-        pnlNav.add(btnZoomIn);
-        pnlNav.add(btnZoomOut);
-        //layers.add(pnlNav, 0);
-        this.add(pnlNav, BorderLayout.NORTH);
-        pnlNav.setVisible(true);
 
         addMouseListener(this);
         addKeyListener(this);
         view = controller;
         fixed = new Complex(0, 0);
-        btnZoomIn.setVisible(true);
-        btnZoomOut.setVisible(true);
+        
     }
 
     public BufferedImage drawFractal(int width, int height, int maxIterations) {
@@ -185,10 +168,8 @@ public class MandelController extends JPanel implements MouseListener, KeyListen
     public void paint(Graphics g) {
         xCenter = getWidth() / 2;
         yCenter = getHeight() / 2;
-        I = MandelController.this.drawFractal(getWidth(), getHeight(), iterations);
+        I = MandelController.this.drawFractal(getWidth(), getHeight(), getIterations());
         g.drawImage(I, 0, 0, this);
-        btnZoomIn.setVisible(true);
-        btnZoomOut.setVisible(true);
     }
 
     @Override
@@ -201,35 +182,12 @@ public class MandelController extends JPanel implements MouseListener, KeyListen
 
     @Override
     public void mousePressed(MouseEvent e) {
-        mousePressed = true;
-        final Object src = e.getSource();
-        new Thread() {
-            @Override
-            public void run() {
-                while (mousePressed) {
-                    if (src == btnZoomIn) {
-                        zoom += zoom * 0.1;
-                    } else if (src == btnZoomOut) {
-                        zoom -= zoom * 0.1;
-                    }
-                    setImageDrawn(false);
-                    repaint();
-                    while (!isImageDrawn()) {
-                        try {
-                            sleep(100);
-                        } catch (InterruptedException ex) {
-                            Logger.getLogger(MandelController.class.getName()).log(Level.SEVERE, null, ex);
-                        }
-                    }
-                }
-            }
-
-        }.start();
+        
     }
 
     @Override
     public void mouseReleased(MouseEvent e) {
-        mousePressed = false;
+        
     }
 
     @Override
@@ -244,20 +202,42 @@ public class MandelController extends JPanel implements MouseListener, KeyListen
 
     @Override
     public void keyTyped(KeyEvent e) {
-        //System.out.println("Key Typed: " + e.getKeyChar());
-        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        System.out.println("Key Typed");
+        if (e.getKeyCode() == KeyEvent.VK_UP) {
+            goUp(1);
+        }else if (e.getKeyCode() == KeyEvent.VK_DOWN) {
+            goDown(1);
+        }else if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
+            goRight(1);
+        }else if (e.getKeyCode() == KeyEvent.VK_LEFT) {
+            goLeft(1);
+        }
+    }
+    
+    public void goLeft(int amount){
+        setXCenter(getXCenter() + amount);
+    }
+    
+    public void goRight(int amount){
+        setXCenter(getXCenter() + amount);
+    }
+    
+    public void goUp(int amount){
+        setYCenter(getYCenter() - amount);
+    }
+    
+    public void goDown(int amount){
+        setYCenter(getYCenter() + amount);
     }
 
     @Override
     public void keyPressed(KeyEvent e) {
-        //System.out.println("Key Pressed: " + e.getKeyChar());
-        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        System.out.println("Key Pressed: " + e.getKeyCode());
     }
 
     @Override
     public void keyReleased(KeyEvent e) {
-        //System.out.println("Key Released: " + e.getKeyChar());
-        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        System.out.println("Key Released: " + e.getKeyCode());
     }
 
     /**
@@ -360,6 +340,20 @@ public class MandelController extends JPanel implements MouseListener, KeyListen
      */
     public void setImageDrawn(boolean imageDrawn) {
         this.imageDrawn = imageDrawn;
+    }
+
+    /**
+     * @return the iterations
+     */
+    public int getIterations() {
+        return iterations;
+    }
+
+    /**
+     * @param iterations the iterations to set
+     */
+    public void setIterations(int iterations) {
+        this.iterations = iterations;
     }
 
 }
