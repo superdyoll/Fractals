@@ -12,9 +12,16 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.io.File;
+import java.io.IOException;
 import static java.lang.Thread.sleep;
+import java.sql.Timestamp;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.imageio.ImageIO;
 import javax.swing.*;
 
 /**
@@ -26,8 +33,13 @@ public class MandelView implements MouseListener, KeyListener {
     private final JLabel lblComplex = new JLabel();
     private MandelController pnlJulia, pnlMandel;
 
-    private JButton btnZoomIn, btnZoomOut, btnLeft, btnRight, btnUp, btnDown;
+    private JButton btnZoomIn, btnZoomOut, btnLeft, btnRight, btnUp, btnDown, btnSave;
     private boolean mousePressed;
+
+    public void saveJulia(String filename) throws IOException {
+        File outputfile = new File(filename + ".jpg");
+        ImageIO.write(pnlJulia.getImage(), "jpg", outputfile);
+    }
 
     public void setComplex(Complex point) {
         lblComplex.setText(point.toString());
@@ -48,12 +60,15 @@ public class MandelView implements MouseListener, KeyListener {
         layers.setOpaque(false);
         layers.setLayout(new BorderLayout());
         layers.setBounds(100, 100, frmOuter.getWidth(), frmOuter.getHeight());
+
+        //Create all Buttons
         this.btnZoomOut = new JButton("Zoom Out");
         this.btnZoomIn = new JButton("Zoom In");
         this.btnUp = new JButton("Up");
         this.btnDown = new JButton("Down");
         this.btnLeft = new JButton("Left");
         this.btnRight = new JButton("Right");
+        this.btnSave = new JButton("Save");
 
         //Add Mouse Listeners        
         btnZoomIn.addMouseListener(this);
@@ -62,6 +77,7 @@ public class MandelView implements MouseListener, KeyListener {
         btnDown.addMouseListener(this);
         btnLeft.addMouseListener(this);
         btnRight.addMouseListener(this);
+        btnSave.addMouseListener(this);
 
         JPanel pnlZoom = new JPanel();
         pnlZoom.setOpaque(false);
@@ -120,6 +136,11 @@ public class MandelView implements MouseListener, KeyListener {
         pnlJuliaMain.add(pnlJulia, BorderLayout.CENTER);
         pnlJulia.setVisible(true);
 
+        //MakeSave panel
+        JPanel pnlSave = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        pnlSave.add(btnSave);
+        pnlJuliaMain.add(pnlSave, BorderLayout.NORTH);
+
         frmJulia.setVisible(true);
     }
 
@@ -130,7 +151,23 @@ public class MandelView implements MouseListener, KeyListener {
 
     @Override
     public void mouseClicked(MouseEvent e) {
-        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        final Object src = e.getSource();
+        new Thread() {
+            @Override
+            public void run() {
+                if (src == btnSave) {
+                    Calendar calendar = new GregorianCalendar();
+                    String time = calendar.get(Calendar.YEAR) + "-" + calendar.get(Calendar.MONTH) + 1 + "-" + calendar.get(Calendar.DAY_OF_MONTH) + "_" + calendar.get(Calendar.MILLISECOND);
+                    System.out.println(time);
+                    try {
+                        saveJulia("Julia_" + time);
+                    } catch (IOException ex) {
+                        Logger.getLogger(MandelView.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+            }
+
+        }.start();
     }
 
     @Override

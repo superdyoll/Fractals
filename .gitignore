@@ -3,4 +3,5 @@
 *.PROPERTIES
 *.MF
 *.class
+*.jpg
 /build/

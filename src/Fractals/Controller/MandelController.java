@@ -25,7 +25,7 @@ import javax.swing.JPanel;
 public class MandelController extends JPanel implements MouseListener, KeyListener {
 
     private final MandelView view;
-    private BufferedImage I;
+    private BufferedImage image;
     private int zoom, xCenter, yCenter, iterations;
     private boolean juliaSet, imageDrawn;
     private Complex fixed;
@@ -63,7 +63,7 @@ public class MandelController extends JPanel implements MouseListener, KeyListen
 
         //Create the new image for double buffering
         BufferedImage graph = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-        //System.out.println("Image created");
+        //System.out.println("image created");
 
         //Do the calculation
         //Go through height
@@ -168,8 +168,8 @@ public class MandelController extends JPanel implements MouseListener, KeyListen
     public void paint(Graphics g) {
         xCenter = getWidth() / 2;
         yCenter = getHeight() / 2;
-        I = MandelController.this.drawFractal(getWidth(), getHeight(), getIterations());
-        g.drawImage(I, 0, 0, this);
+        setImage(MandelController.this.drawFractal(getWidth(), getHeight(), getIterations()));
+        g.drawImage(getImage(), 0, 0, this);
     }
 
     @Override
@@ -354,6 +354,20 @@ public class MandelController extends JPanel implements MouseListener, KeyListen
      */
     public void setIterations(int iterations) {
         this.iterations = iterations;
+    }
+
+    /**
+     * @return the image
+     */
+    public BufferedImage getImage() {
+        return image;
+    }
+
+    /**
+     * @param image the image to set
+     */
+    public void setImage(BufferedImage image) {
+        this.image = image;
     }
 
 }
