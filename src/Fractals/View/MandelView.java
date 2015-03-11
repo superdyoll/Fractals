@@ -33,7 +33,7 @@ public class MandelView implements MouseListener, KeyListener {
     private final JLabel lblComplex = new JLabel();
     private MandelController pnlJulia, pnlMandel;
 
-    private JButton btnZoomIn, btnZoomOut, btnLeft, btnRight, btnUp, btnDown, btnSave;
+    private JButton btnZoomIn, btnZoomOut, btnLeft, btnRight, btnUp, btnDown, btnSave, btnReset;
     private boolean mousePressed;
 
     public void saveJulia(String filename) throws IOException {
@@ -69,6 +69,7 @@ public class MandelView implements MouseListener, KeyListener {
         this.btnLeft = new JButton("Left");
         this.btnRight = new JButton("Right");
         this.btnSave = new JButton("Save");
+        this.btnReset = new JButton("Reset everything");
 
         //Add Mouse Listeners        
         btnZoomIn.addMouseListener(this);
@@ -78,6 +79,7 @@ public class MandelView implements MouseListener, KeyListener {
         btnLeft.addMouseListener(this);
         btnRight.addMouseListener(this);
         btnSave.addMouseListener(this);
+        btnReset.addMouseListener(this);
 
         JPanel pnlZoom = new JPanel();
         pnlZoom.setOpaque(false);
@@ -96,6 +98,7 @@ public class MandelView implements MouseListener, KeyListener {
         JPanel pnlNav = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         pnlNav.setOpaque(false);
         pnlNav.add(pnlControl);
+        pnlNav.add(btnReset);
 
         layers.add(pnlNav, BorderLayout.NORTH, 0);
         btnZoomIn.setVisible(true);
@@ -105,6 +108,7 @@ public class MandelView implements MouseListener, KeyListener {
         //Make mandel panel
         pnlMandel = new MandelController(this);
         pnlMandel.setIterations(570);
+        pnlMandel.initialiseXY();
         layers.add(pnlMandel, BorderLayout.CENTER, 1);
         pnlMain.add(layers, BorderLayout.CENTER);
         frmOuter.addKeyListener(this);
@@ -135,6 +139,7 @@ public class MandelView implements MouseListener, KeyListener {
         pnlJulia = new MandelController(this, true, 50);
         pnlJuliaMain.add(pnlJulia, BorderLayout.CENTER);
         pnlJulia.setVisible(true);
+        pnlJulia.initialiseXY();
 
         //MakeSave panel
         JPanel pnlSave = new JPanel(new FlowLayout(FlowLayout.RIGHT));
@@ -164,6 +169,11 @@ public class MandelView implements MouseListener, KeyListener {
                     } catch (IOException ex) {
                         Logger.getLogger(MandelView.class.getName()).log(Level.SEVERE, null, ex);
                     }
+                }else if(src == btnReset){
+                    pnlMandel.initialiseXY();
+                    pnlMandel.setZoom(100);
+                    pnlJulia.initialiseXY();
+                    pnlJulia.setZoom(100);
                 }
             }
 
