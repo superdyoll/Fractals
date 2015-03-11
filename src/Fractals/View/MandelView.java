@@ -30,7 +30,6 @@ public class MandelView{
     public void drawStuff(){
         //Basic Frame stuff
         JFrame frmOuter = new JFrame ("Mandlebrot Set");
-        System.out.println("Titled");
         frmOuter.setBounds(100, 100, 800, 600);
         frmOuter.setDefaultCloseOperation(frmOuter.EXIT_ON_CLOSE);
         

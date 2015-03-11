@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package Fractals.Controller;
 
 import Fractals.Maths.Complex;
@@ -31,7 +26,7 @@ public class MandelController extends JPanel implements MouseListener, KeyListen
 
     private final MandelView view;
     private BufferedImage I;
-    private int zoom, xCenter, yCenter;
+    private int zoom, xCenter, yCenter, iterations;
     private boolean juliaSet, mousePressed, imageDrawn;
     private Complex fixed;
 
@@ -48,6 +43,8 @@ public class MandelController extends JPanel implements MouseListener, KeyListen
     }
 
     public MandelController(MandelView controller, boolean juliaSet, int zoom) {
+        iterations = 100;
+        
         this.btnZoomOut = new JButton("Zoom Out");
         this.btnZoomIn = new JButton("Zoom In");
         this.juliaSet = juliaSet;
@@ -62,8 +59,8 @@ public class MandelController extends JPanel implements MouseListener, KeyListen
         pnlNav.setLayout(new FlowLayout(FlowLayout.RIGHT));
         pnlNav.add(btnZoomIn);
         pnlNav.add(btnZoomOut);
-        layers.add(pnlNav, 0);
-        this.add(layers, BorderLayout.NORTH);
+        //layers.add(pnlNav, 0);
+        this.add(pnlNav, BorderLayout.NORTH);
         pnlNav.setVisible(true);
 
         addMouseListener(this);
@@ -188,7 +185,7 @@ public class MandelController extends JPanel implements MouseListener, KeyListen
     public void paint(Graphics g) {
         xCenter = getWidth() / 2;
         yCenter = getHeight() / 2;
-        I = MandelController.this.drawFractal(getWidth(), getHeight(), 570);
+        I = MandelController.this.drawFractal(getWidth(), getHeight(), iterations);
         g.drawImage(I, 0, 0, this);
         btnZoomIn.setVisible(true);
         btnZoomOut.setVisible(true);
@@ -207,12 +204,13 @@ public class MandelController extends JPanel implements MouseListener, KeyListen
         mousePressed = true;
         final Object src = e.getSource();
         new Thread() {
+            @Override
             public void run() {
                 while (mousePressed) {
                     if (src == btnZoomIn) {
-                        setZoom(getZoom() + (getZoom()* 0.1));
+                        zoom += zoom * 0.1;
                     } else if (src == btnZoomOut) {
-                        setZoom(getZoom() + (getZoom()* 0.1));
+                        zoom -= zoom * 0.1;
                     }
                     setImageDrawn(false);
                     repaint();
@@ -300,12 +298,18 @@ public class MandelController extends JPanel implements MouseListener, KeyListen
     /**
      * @param currentZoom the zoom to set
      */
-    public final void setZoom(int currentZoom) {
-        if (currentZoom > 0){
-            this.zoom = currentZoom;
-        }
+    public void setZoom(int currentZoom) {
+        this.zoom = currentZoom;
+    }
+    
+    public void zoomIn(){
+        zoom += zoom * 0.1;
     }
 
+    public void zoomOut(){
+        zoom -= zoom * 0.1;
+    }
+    
     /**
      * @return the xCenter
      */
