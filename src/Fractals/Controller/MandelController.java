@@ -11,6 +11,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 import java.awt.image.BufferedImage;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -22,12 +23,12 @@ import javax.swing.JPanel;
  *
  * @author Lloyd
  */
-public class MandelController extends JPanel implements MouseListener, KeyListener {
+public class MandelController extends JPanel implements MouseListener, MouseMotionListener, KeyListener {
 
     private final MandelView view;
     private BufferedImage image;
     private int zoom, xCenter, yCenter, iterations;
-    private boolean juliaSet, imageDrawn;
+    private boolean juliaSet, imageDrawn, onZoomMode;
     private Complex fixed;
 
     public MandelController(MandelView controller) {
@@ -56,42 +57,6 @@ public class MandelController extends JPanel implements MouseListener, KeyListen
         yCenter = this.getHeight() / 2;
     }
 
-    public BufferedImage drawFractal(int width, int height, int maxIterations) {
-
-        setImageDrawn(false);
-
-        //Make a new model
-        MandelModel newMandel = new MandelModel();
-
-        //Create the new image for double buffering
-        BufferedImage graph = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-        //System.out.println("image created");
-
-        //Do the calculation
-        //Go through height
-        for (int y = 0; y < height; y++) {
-            //Go through width
-            for (int x = 0; x < width; x++) {
-                //Make new Complex point
-                Complex point = new Complex(((float) (x - xCenter) / getZoom()), ((float) (y - yCenter) / getZoom()));
-                //Work out the iterations taken diverge
-                int iter;
-                if (isJuliaSet()) {
-                    iter = newMandel.calculateJuliaPoint(point, getFixed(), maxIterations);
-                } else {
-                    iter = newMandel.calculateMandelPoint(point, maxIterations);
-                }
-                //Get the colour from the colour map
-                Color c = getColour(maxIterations, iter);
-                //Get the RGB
-                int rgb = c.getRGB();
-                //Add the point on the image
-                graph.setRGB(x, y, rgb);
-            }
-        }
-        setImageDrawn(true);
-        return graph;
-    }
 
     /**
      * Returns the colour according to the colour map similar to the wikipedia
@@ -168,7 +133,7 @@ public class MandelController extends JPanel implements MouseListener, KeyListen
 
     @Override
     public void paint(Graphics g) {
-        setImage(MandelController.this.drawFractal(getWidth(), getHeight(), getIterations()));
+        setImage(new MandelModel().drawFractal(getWidth(), getHeight(), getIterations(), this));
         g.drawImage(getImage(), 0, 0, this);
     }
 
@@ -215,19 +180,19 @@ public class MandelController extends JPanel implements MouseListener, KeyListen
     }
 
     public void goLeft(int amount) {
-        setXCenter(getXCenter() - amount);
-    }
-
-    public void goRight(int amount) {
         setXCenter(getXCenter() + amount);
     }
 
+    public void goRight(int amount) {
+        setXCenter(getXCenter() - amount);
+    }
+
     public void goUp(int amount) {
-        setYCenter(getYCenter() - amount);
+        setYCenter(getYCenter() + amount);
     }
 
     public void goDown(int amount) {
-        setYCenter(getYCenter() + amount);
+        setYCenter(getYCenter() - amount);
     }
 
     @Override
@@ -358,6 +323,16 @@ public class MandelController extends JPanel implements MouseListener, KeyListen
      */
     public void setImage(BufferedImage image) {
         this.image = image;
+    }
+
+    @Override
+    public void mouseDragged(MouseEvent e) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void mouseMoved(MouseEvent e) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
 }

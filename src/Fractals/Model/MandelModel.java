@@ -5,7 +5,10 @@
  */
 package Fractals.Model;
 
+import Fractals.Controller.MandelController;
 import Fractals.Maths.Complex;
+import java.awt.Color;
+import java.awt.image.BufferedImage;
 
 /**
  *
@@ -32,6 +35,29 @@ public class MandelModel {
             iter--;
         }
         return iter;
+    }
+
+    public BufferedImage drawFractal(int width, int height, int maxIterations, MandelController mandelController) {
+        mandelController.setImageDrawn(false);
+        MandelModel newMandel = new MandelModel();
+        BufferedImage graph = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                Complex point = new Complex((float) (x - mandelController.getXCenter()) / mandelController.getZoom(), (float) (y - mandelController.getYCenter()) / mandelController.getZoom());
+                //Work out the iterations taken diverge
+                int iter;
+                if (mandelController.isJuliaSet()) {
+                    iter = newMandel.calculateJuliaPoint(point, mandelController.getFixed(), maxIterations);
+                } else {
+                    iter = newMandel.calculateMandelPoint(point, maxIterations);
+                }
+                Color c = mandelController.getColour(maxIterations, iter);
+                int rgb = c.getRGB();
+                graph.setRGB(x, y, rgb);
+            }
+        }
+        mandelController.setImageDrawn(true);
+        return graph;
     }
 
 }
