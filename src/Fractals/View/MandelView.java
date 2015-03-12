@@ -36,10 +36,18 @@ public class MandelView implements MouseListener, KeyListener, MouseMotionListen
     private final JLabel lblComplex = new JLabel();
     private MandelController pnlJulia, pnlMandel;
 
-    private JButton btnZoomIn, btnZoomOut, btnLeft, btnRight, btnUp, btnDown, btnSave, btnReset;
+    private JButton btnSet, btnSave, btnReset;
     private JToggleButton btnZoomMode, btnShowJulia;
+    private JTextField txtIter;
     private boolean mousePressed;
 
+    /**Turn the image into a file
+     * 
+     * filename denotes what the file should be called
+     *
+     * @param filename
+     * @throws IOException
+     */
     public void saveJulia(String filename) throws IOException {
         File outputfile = new File(filename + ".jpg");
         ImageIO.write(pnlJulia.getImage(), "jpg", outputfile);
@@ -51,7 +59,10 @@ public class MandelView implements MouseListener, KeyListener, MouseMotionListen
         pnlJulia.repaint();
     }
 
-    public void drawStuff() {
+    /**Draw all the main frame objects
+     *
+     */
+    public void drawFrame() {
         //Basic Frame stuff
         JFrame frmOuter = new JFrame("Mandlebrot Set");
         frmOuter.setBounds(100, 100, 800, 600);
@@ -66,24 +77,15 @@ public class MandelView implements MouseListener, KeyListener, MouseMotionListen
         layers.setBounds(100, 100, frmOuter.getWidth(), frmOuter.getHeight());
 
         //Create all Buttons
-        this.btnZoomOut = new JButton("Zoom Out");
-        this.btnZoomIn = new JButton("Zoom In");
-        this.btnUp = new JButton("Up");
-        this.btnDown = new JButton("Down");
-        this.btnLeft = new JButton("Left");
-        this.btnRight = new JButton("Right");
+        this.btnSet = new JButton("Set");
         this.btnSave = new JButton("Save");
         this.btnReset = new JButton("Reset everything");
         this.btnZoomMode = new JToggleButton("Zoom Mode");
         this.btnShowJulia = new JToggleButton("Show Julia");
+        this.txtIter = new JTextField();
         
         //Add Mouse Listeners        
-        btnZoomIn.addMouseListener(this);
-        btnZoomOut.addMouseListener(this);
-        btnUp.addMouseListener(this);
-        btnDown.addMouseListener(this);
-        btnLeft.addMouseListener(this);
-        btnRight.addMouseListener(this);
+        btnSet.addMouseListener(this);
         btnSave.addMouseListener(this);
         btnReset.addMouseListener(this);
 
@@ -104,35 +106,21 @@ public class MandelView implements MouseListener, KeyListener, MouseMotionListen
                 }
             }
         });
-        
-        
-        
-        
 
-        JPanel pnlZoom = new JPanel();
-        pnlZoom.setOpaque(false);
-        pnlZoom.setLayout(new GridLayout(2, 1));
-        pnlZoom.add(btnZoomIn);
-        pnlZoom.add(btnZoomOut);
-
-        JPanel pnlControl = new JPanel(new BorderLayout());
+        JPanel pnlControl = new JPanel(new FlowLayout(FlowLayout.LEFT));
         pnlControl.setOpaque(false);
-        pnlControl.add(btnUp, BorderLayout.NORTH);
-        pnlControl.add(btnDown, BorderLayout.SOUTH);
-        pnlControl.add(btnLeft, BorderLayout.WEST);
-        pnlControl.add(btnRight, BorderLayout.EAST);
-        pnlControl.add(pnlZoom, BorderLayout.CENTER);
+        pnlControl.add(txtIter);
+        pnlControl.add(btnSet);
+
 
         JPanel pnlNav = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         pnlNav.setOpaque(false);
-        //pnlNav.add(pnlControl);
+        pnlNav.add(pnlControl);
         pnlNav.add(btnReset);
         pnlNav.add(btnZoomMode);
         pnlNav.add(btnShowJulia);
 
         layers.add(pnlNav, BorderLayout.NORTH, 0);
-        btnZoomIn.setVisible(true);
-        btnZoomOut.setVisible(true);
         pnlNav.setVisible(true);
 
         //Make mandel panel
@@ -199,7 +187,7 @@ public class MandelView implements MouseListener, KeyListener, MouseMotionListen
 
     public static void main(String[] args) {
         MandelView mandel = new MandelView();
-        mandel.drawStuff();
+        mandel.drawFrame();
     }
 
     @Override
@@ -236,7 +224,7 @@ public class MandelView implements MouseListener, KeyListener, MouseMotionListen
             @Override
             public void run() {
                 while (mousePressed) {
-                    if (src == btnZoomIn) {
+                    /*if (src == btnZoomIn) {
                         pnlMandel.zoomIn();
                         System.out.println(pnlMandel.getZoom());
                     } else if (src == btnZoomOut) {
@@ -249,7 +237,7 @@ public class MandelView implements MouseListener, KeyListener, MouseMotionListen
                         pnlMandel.goLeft(1);
                     } else if (src == btnRight) {
                         pnlMandel.goRight(1);
-                    }
+                    }*/
                     pnlMandel.setImageDrawn(false);
                     pnlMandel.repaint();
                     while (!pnlMandel.isImageDrawn()) {
@@ -314,9 +302,9 @@ public class MandelView implements MouseListener, KeyListener, MouseMotionListen
         if (src instanceof MandelController){
             MandelController mdlControl = (MandelController) src;
             if(mdlControl.isOnZoomMode()){
-                System.out.println(mdlControl.getName() + " Zoom drag");
+                System.out.println(mdlControl.getClass().toString() + " Zoom drag");
             }else{
-                System.out.println(mdlControl.getName() + " Pan Drag");
+                System.out.println(mdlControl.getClass().toString() + " Pan Drag");
             }
         }
     }
