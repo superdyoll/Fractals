@@ -145,10 +145,17 @@ public class MandelController extends JPanel implements MouseListener, KeyListen
         AffineTransform panTranslator = new AffineTransform();
         double difX = getEndMouseX() - getStartMouseX();
         double difY = getEndMouseY() - getStartMouseY();
-        setPanX(getPanX() + difX/zoom);
-        setPanY(getPanY() + difY/zoom);
-        panTranslator.setToTranslation(getPanX(),getPanY());
-        transformer.concatenate(panTranslator);
+        //setPanX(getPanX() + difX/zoom);
+        //setPanY(getPanY() + difY/zoom);
+        System.out.println(panX + " " + panY);
+        //panTranslator.setToTranslation(getPanX(),getPanY());
+        //transformer.concatenate(panTranslator);
+        
+        setPanX(difX/zoom);
+        setPanY(difY/zoom);
+        setXCenter((int) (xCenter + panX));
+        setYCenter((int) (yCenter + panY));
+        repaint();
     }
 
     @Override
@@ -156,7 +163,7 @@ public class MandelController extends JPanel implements MouseListener, KeyListen
         setImage(new MandelModel().drawFractal(getWidth(), getHeight(), getIterations(), this));
         g.drawImage(getImage(), 0, 0, this);
         Graphics2D g2d = (Graphics2D) g;
-        g2d.setTransform(getTransformer());
+        g2d.setTransform(transformer);
     }
 
     @Override
@@ -177,16 +184,15 @@ public class MandelController extends JPanel implements MouseListener, KeyListen
 
     @Override
     public void mouseReleased(MouseEvent e) {
-
         setEndMouseX(e.getX());
         setEndMouseY(e.getY());
         double difX = getEndMouseX() - getStartMouseX();
         double difY = getEndMouseY() - getStartMouseY();
-        setPanX(getPanX() + difX/zoom);
-        setPanY(getPanY() + difY/zoom);
+        setPanX(difX/zoom);
+        setPanY(difY/zoom);
         System.out.println("X difference: " + difX + " Y difference: " + difY);
-        double centerX = (getStartMouseX() / zoom) + difX;
-        double centerY = (getStartMouseY() / zoom) + difY;
+        double centerX = getXCenter() + panX;
+        double centerY = getYCenter() + panY;
         System.out.println("X center " + centerX + " Y center " + centerY);
     }
 

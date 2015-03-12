@@ -156,10 +156,8 @@ public class MandelView implements MouseListener, KeyListener, MouseMotionListen
         btnShowJulia.addItemListener(new ItemListener() {
             public void itemStateChanged(ItemEvent ev) {
                 if (ev.getStateChange() == ItemEvent.SELECTED) {
-                    System.out.println("button is selected");
                     frmJulia.setVisible(true);
                 } else if (ev.getStateChange() == ItemEvent.DESELECTED) {
-                    System.out.println("button is not selected");
                     frmJulia.setVisible(false);
                 }
             }
@@ -292,11 +290,7 @@ public class MandelView implements MouseListener, KeyListener, MouseMotionListen
             //If it is cast it as one to enable methods
             MandelController mdlControl = (MandelController) src;
             //See if zoom mode is enabled
-            if(mdlControl.isOnZoomMode()){
-                
-                //mdlControl.zoomIn();
-                //System.out.println(mdlControl.getClass().toString() + " Zoom drag");
-            }else{
+            if(!mdlControl.isOnZoomMode()){
                 mdlControl.setEndMouseX(e.getX());
                 mdlControl.setEndMouseY(e.getY());
                 mdlControl.panImage();
