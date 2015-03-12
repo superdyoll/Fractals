@@ -41,6 +41,7 @@ public class MandelView implements MouseListener, KeyListener, MouseMotionListen
     private JTextField txtIter;
     private boolean mousePressed;
 
+
     /**Turn the image into a file
      * 
      * filename denotes what the file should be called
@@ -56,7 +57,6 @@ public class MandelView implements MouseListener, KeyListener, MouseMotionListen
     public void setComplex(Complex point) {
         lblComplex.setText(point.toString());
         pnlJulia.setFixed(point);
-        pnlJulia.repaint();
     }
 
     /**Draw all the main frame objects
@@ -206,9 +206,9 @@ public class MandelView implements MouseListener, KeyListener, MouseMotionListen
                         Logger.getLogger(MandelView.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 } else if (src == btnReset) {
-                    pnlMandel.initialiseXY();
+                    pnlMandel.initialiseXY(false);
                     pnlMandel.setZoom(100);
-                    pnlJulia.initialiseXY();
+                    pnlJulia.initialiseXY(false);
                     pnlJulia.setZoom(100);
                 }
             }
@@ -218,7 +218,7 @@ public class MandelView implements MouseListener, KeyListener, MouseMotionListen
 
     @Override
     public void mousePressed(MouseEvent e) {
-        mousePressed = true;
+        /*mousePressed = true;
         final Object src = e.getSource();
         new Thread() {
             @Override
@@ -237,9 +237,9 @@ public class MandelView implements MouseListener, KeyListener, MouseMotionListen
                         pnlMandel.goLeft(1);
                     } else if (src == btnRight) {
                         pnlMandel.goRight(1);
-                    }*/
+                    }
                     pnlMandel.setImageDrawn(false);
-                    pnlMandel.repaint();
+                    pnlMandel.repaint();    
                     while (!pnlMandel.isImageDrawn()) {
                         try {
                             sleep(100);
@@ -250,12 +250,13 @@ public class MandelView implements MouseListener, KeyListener, MouseMotionListen
                 }
             }
 
-        }.start();
+        }.start();*/
+        
     }
 
     @Override
     public void mouseReleased(MouseEvent e) {
-        mousePressed = false;
+       mousePressed = false;
     }
 
     @Override
@@ -286,25 +287,19 @@ public class MandelView implements MouseListener, KeyListener, MouseMotionListen
     @Override
     public void mouseDragged(MouseEvent e) {
         Object src = e.getSource();
-        /*if (src == pnlMandel){
-            if(pnlMandel.isOnZoomMode()){
-                System.out.println("Mandel Zoom drag");
-            }else{
-                System.out.println("Mandel Pan Drag");
-            }
-        }else if (src == pnlJulia){
-            if(pnlJulia.isOnZoomMode()){
-                System.out.println("Julia Zoom drag");
-            }else{
-                System.out.println("Julia Pan Drag");
-            }
-        }*/
+        //Check the object clicked on is a fractal
         if (src instanceof MandelController){
+            //If it is cast it as one to enable methods
             MandelController mdlControl = (MandelController) src;
+            //See if zoom mode is enabled
             if(mdlControl.isOnZoomMode()){
-                System.out.println(mdlControl.getClass().toString() + " Zoom drag");
+                
+                //mdlControl.zoomIn();
+                //System.out.println(mdlControl.getClass().toString() + " Zoom drag");
             }else{
-                System.out.println(mdlControl.getClass().toString() + " Pan Drag");
+                mdlControl.setEndMouseX(e.getX());
+                mdlControl.setEndMouseY(e.getY());
+                mdlControl.panImage();
             }
         }
     }

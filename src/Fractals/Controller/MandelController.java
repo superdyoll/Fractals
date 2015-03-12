@@ -7,11 +7,13 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -30,6 +32,8 @@ public class MandelController extends JPanel implements MouseListener, KeyListen
     private int zoom, xCenter, yCenter, iterations;
     private boolean juliaSet, imageDrawn, onZoomMode;
     private Complex fixed;
+    private double startMouseX, startMouseY, endMouseX, endMouseY, panX, panY;
+    private AffineTransform transformer = new AffineTransform();
 
     public MandelController(MandelView controller) {
         this(controller, false, 150);
@@ -51,12 +55,18 @@ public class MandelController extends JPanel implements MouseListener, KeyListen
         view = controller;
         fixed = new Complex(0, 0);
     }
-    
-    public void initialiseXY (){
-        xCenter = this.getWidth() / 2;
-        yCenter = this.getHeight() / 2;
+
+    public void initialiseXY() {
+        initialiseXY(true);
     }
 
+    public void initialiseXY(boolean doRepaint) {
+        xCenter = this.getWidth() / 2;
+        yCenter = this.getHeight() / 2;
+        if (doRepaint) {
+            this.repaint();
+        }
+    }
 
     /**
      * Returns the colour according to the colour map similar to the wikipedia
@@ -130,11 +140,23 @@ public class MandelController extends JPanel implements MouseListener, KeyListen
             return new Color(0, 0, 0);
         }
     }
+    
+    public void panImage(){
+        AffineTransform panTranslator = new AffineTransform();
+        double difX = getEndMouseX() - getStartMouseX();
+        double difY = getEndMouseY() - getStartMouseY();
+        setPanX(getPanX() + difX/zoom);
+        setPanY(getPanY() + difY/zoom);
+        panTranslator.setToTranslation(getPanX(),getPanY());
+        transformer.concatenate(panTranslator);
+    }
 
     @Override
-    public void paint(Graphics g) {
+    public void paintComponent(Graphics g) {
         setImage(new MandelModel().drawFractal(getWidth(), getHeight(), getIterations(), this));
         g.drawImage(getImage(), 0, 0, this);
+        Graphics2D g2d = (Graphics2D) g;
+        g2d.setTransform(getTransformer());
     }
 
     @Override
@@ -143,16 +165,29 @@ public class MandelController extends JPanel implements MouseListener, KeyListen
             Complex point = new Complex(((float) (e.getX() - getXCenter()) / getZoom()), ((float) (e.getY() - getYCenter()) / getZoom()));
             view.setComplex(point);
         }
+        getTransformer().translate(5,5);
+        this.repaint();
     }
 
     @Override
     public void mousePressed(MouseEvent e) {
-
+        setStartMouseX(e.getX());
+        setStartMouseY(e.getY());
     }
 
     @Override
     public void mouseReleased(MouseEvent e) {
 
+        setEndMouseX(e.getX());
+        setEndMouseY(e.getY());
+        double difX = getEndMouseX() - getStartMouseX();
+        double difY = getEndMouseY() - getStartMouseY();
+        setPanX(getPanX() + difX/zoom);
+        setPanY(getPanY() + difY/zoom);
+        System.out.println("X difference: " + difX + " Y difference: " + difY);
+        double centerX = (getStartMouseX() / zoom) + difX;
+        double centerY = (getStartMouseY() / zoom) + difY;
+        System.out.println("X center " + centerX + " Y center " + centerY);
     }
 
     @Override
@@ -230,7 +265,17 @@ public class MandelController extends JPanel implements MouseListener, KeyListen
      * @param fixed the fixed to set
      */
     public void setFixed(Complex fixed) {
+        setFixed(fixed, true);
+    }
+
+    /**
+     * @param fixed the fixed to set
+     */
+    public void setFixed(Complex fixed, boolean doRepaint) {
         this.fixed = fixed;
+        if (doRepaint) {
+            this.repaint();
+        }
     }
 
     /**
@@ -240,19 +285,28 @@ public class MandelController extends JPanel implements MouseListener, KeyListen
         return zoom;
     }
 
+    public void setZoom(int currentZoom) {
+        setZoom(currentZoom, true);
+    }
+
     /**
      * @param currentZoom the zoom to set
      */
-    public void setZoom(int currentZoom) {
+    public void setZoom(int currentZoom, boolean doRepaint) {
         this.zoom = currentZoom;
+        if (doRepaint) {
+            this.repaint();
+        }
     }
 
     public void zoomIn() {
         zoom += zoom * 0.1;
+        this.repaint();
     }
 
     public void zoomOut() {
         zoom -= zoom * 0.1;
+        this.repaint();
     }
 
     /**
@@ -262,11 +316,18 @@ public class MandelController extends JPanel implements MouseListener, KeyListen
         return xCenter;
     }
 
+    public void setXCenter(int currentXCenter) {
+        setXCenter(currentXCenter, true);
+    }
+
     /**
      * @param currentXCenter the xCenter to set
      */
-    public void setXCenter(int currentXCenter) {
+    public void setXCenter(int currentXCenter, boolean doRepaint) {
         this.xCenter = currentXCenter;
+        if (doRepaint) {
+            this.repaint();
+        }
     }
 
     /**
@@ -276,11 +337,18 @@ public class MandelController extends JPanel implements MouseListener, KeyListen
         return yCenter;
     }
 
+    public void setYCenter(int currentYCenter) {
+        setYCenter(currentYCenter, true);
+    }
+
     /**
      * @param currentYCenter the yCenter to set
      */
-    public void setYCenter(int currentYCenter) {
+    public void setYCenter(int currentYCenter, boolean doRepaint) {
         this.yCenter = currentYCenter;
+        if (doRepaint) {
+            this.repaint();
+        }
     }
 
     /**
@@ -304,11 +372,19 @@ public class MandelController extends JPanel implements MouseListener, KeyListen
         return iterations;
     }
 
-    /**
-     * @param iterations the iterations to set
-     */
     public void setIterations(int iterations) {
+        setIterations(iterations, true);
+    }
+
+    /**
+     * @param iterations the iterations
+     * @param doRepaint
+     */
+    public void setIterations(int iterations, boolean doRepaint) {
         this.iterations = iterations;
+        if (doRepaint) {
+            this.repaint();
+        }
     }
 
     /**
@@ -323,6 +399,7 @@ public class MandelController extends JPanel implements MouseListener, KeyListen
      */
     public void setImage(BufferedImage image) {
         this.image = image;
+        this.repaint();
     }
 
     /**
@@ -337,6 +414,104 @@ public class MandelController extends JPanel implements MouseListener, KeyListen
      */
     public void setOnZoomMode(boolean onZoomMode) {
         this.onZoomMode = onZoomMode;
+    }
+
+    /**
+     * @return the startMouseX
+     */
+    public double getStartMouseX() {
+        return startMouseX;
+    }
+
+    /**
+     * @param startMouseX the startMouseX to set
+     */
+    public void setStartMouseX(double startMouseX) {
+        this.startMouseX = startMouseX;
+    }
+
+    /**
+     * @return the startMouseY
+     */
+    public double getStartMouseY() {
+        return startMouseY;
+    }
+
+    /**
+     * @param startMouseY the startMouseY to set
+     */
+    public void setStartMouseY(double startMouseY) {
+        this.startMouseY = startMouseY;
+    }
+
+    /**
+     * @return the endMouseX
+     */
+    public double getEndMouseX() {
+        return endMouseX;
+    }
+
+    /**
+     * @param endMouseX the endMouseX to set
+     */
+    public void setEndMouseX(double endMouseX) {
+        this.endMouseX = endMouseX;
+    }
+
+    /**
+     * @return the endMouseY
+     */
+    public double getEndMouseY() {
+        return endMouseY;
+    }
+
+    /**
+     * @param endMouseY the endMouseY to set
+     */
+    public void setEndMouseY(double endMouseY) {
+        this.endMouseY = endMouseY;
+    }
+
+    /**
+     * @return the panX
+     */
+    public double getPanX() {
+        return panX;
+    }
+
+    /**
+     * @param panX the panX to set
+     */
+    public void setPanX(double panX) {
+        this.panX = panX;
+    }
+
+    /**
+     * @return the panY
+     */
+    public double getPanY() {
+        return panY;
+    }
+
+    /**
+     * @param panY the panY to set
+     */
+    public void setPanY(double panY) {
+        this.panY = panY;
+    }
+
+    /**
+     * @return the transformer
+     */
+    public AffineTransform getTransformer() {
+        return transformer;
+    }
+
+    /**
+     * @param transformer the transformer to set
+     */
+    public void setTransformer(AffineTransform transformer) {
+        this.transformer = transformer;
     }
 
 }
