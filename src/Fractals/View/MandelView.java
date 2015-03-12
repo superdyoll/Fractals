@@ -8,10 +8,13 @@ package Fractals.View;
 import Fractals.Controller.MandelController;
 import Fractals.Maths.Complex;
 import java.awt.*;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 import java.io.File;
 import java.io.IOException;
 import static java.lang.Thread.sleep;
@@ -28,12 +31,13 @@ import javax.swing.*;
  *
  * @author Lloyd
  */
-public class MandelView implements MouseListener, KeyListener {
+public class MandelView implements MouseListener, KeyListener, MouseMotionListener {
 
     private final JLabel lblComplex = new JLabel();
     private MandelController pnlJulia, pnlMandel;
 
     private JButton btnZoomIn, btnZoomOut, btnLeft, btnRight, btnUp, btnDown, btnSave, btnReset;
+    private JToggleButton btnZoomMode, btnShowJulia;
     private boolean mousePressed;
 
     public void saveJulia(String filename) throws IOException {
@@ -70,7 +74,9 @@ public class MandelView implements MouseListener, KeyListener {
         this.btnRight = new JButton("Right");
         this.btnSave = new JButton("Save");
         this.btnReset = new JButton("Reset everything");
-
+        this.btnZoomMode = new JToggleButton("Zoom Mode");
+        this.btnShowJulia = new JToggleButton("Show Julia");
+        
         //Add Mouse Listeners        
         btnZoomIn.addMouseListener(this);
         btnZoomOut.addMouseListener(this);
@@ -80,6 +86,28 @@ public class MandelView implements MouseListener, KeyListener {
         btnRight.addMouseListener(this);
         btnSave.addMouseListener(this);
         btnReset.addMouseListener(this);
+
+        btnZoomMode.addItemListener(new ItemListener() {
+            public void itemStateChanged(ItemEvent ev) {
+                if (ev.getStateChange() == ItemEvent.SELECTED) {
+                    System.out.println("button is selected");
+                    pnlMandel.setOnZoomMode(true);
+                    pnlMandel.setCursor(new Cursor(Cursor.CROSSHAIR_CURSOR));
+                    pnlJulia.setOnZoomMode(true);
+                    pnlJulia.setCursor(new Cursor(Cursor.CROSSHAIR_CURSOR));
+                } else if (ev.getStateChange() == ItemEvent.DESELECTED) {
+                    System.out.println("button is not selected");
+                    pnlMandel.setOnZoomMode(false);
+                    pnlMandel.setCursor(new Cursor(Cursor.HAND_CURSOR));
+                    pnlJulia.setOnZoomMode(false);
+                    pnlJulia.setCursor(new Cursor(Cursor.HAND_CURSOR));
+                }
+            }
+        });
+        
+        
+        
+        
 
         JPanel pnlZoom = new JPanel();
         pnlZoom.setOpaque(false);
@@ -97,8 +125,10 @@ public class MandelView implements MouseListener, KeyListener {
 
         JPanel pnlNav = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         pnlNav.setOpaque(false);
-        pnlNav.add(pnlControl);
+        //pnlNav.add(pnlControl);
         pnlNav.add(btnReset);
+        pnlNav.add(btnZoomMode);
+        pnlNav.add(btnShowJulia);
 
         layers.add(pnlNav, BorderLayout.NORTH, 0);
         btnZoomIn.setVisible(true);
@@ -108,11 +138,12 @@ public class MandelView implements MouseListener, KeyListener {
         //Make mandel panel
         pnlMandel = new MandelController(this);
         pnlMandel.setIterations(570);
-        pnlMandel.initialiseXY();
         layers.add(pnlMandel, BorderLayout.CENTER, 1);
         pnlMain.add(layers, BorderLayout.CENTER);
         frmOuter.addKeyListener(this);
         pnlMandel.setVisible(true);
+        pnlMandel.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        pnlMandel.addMouseMotionListener(this);
         layers.setVisible(true);
 
         lblComplex.setText("Click on a point to view the complex number");
@@ -130,16 +161,30 @@ public class MandelView implements MouseListener, KeyListener {
         frmOuter.setVisible(true);
 
         //Make Julia frame
-        JFrame frmJulia = new JFrame("Julia Set");
+        final JFrame frmJulia = new JFrame("Julia Set");
         frmJulia.setBounds(100, 100, 400, 300);
+        
+        btnShowJulia.setSelected(true);
+        btnShowJulia.addItemListener(new ItemListener() {
+            public void itemStateChanged(ItemEvent ev) {
+                if (ev.getStateChange() == ItemEvent.SELECTED) {
+                    System.out.println("button is selected");
+                    frmJulia.setVisible(true);
+                } else if (ev.getStateChange() == ItemEvent.DESELECTED) {
+                    System.out.println("button is not selected");
+                    frmJulia.setVisible(false);
+                }
+            }
+        });
 
         Container pnlJuliaMain = frmJulia.getContentPane();
 
         //Make mandel panel
         pnlJulia = new MandelController(this, true, 50);
         pnlJuliaMain.add(pnlJulia, BorderLayout.CENTER);
+        pnlJulia.addMouseMotionListener(this);
+        pnlJulia.setCursor(new Cursor(Cursor.HAND_CURSOR));
         pnlJulia.setVisible(true);
-        pnlJulia.initialiseXY();
 
         //MakeSave panel
         JPanel pnlSave = new JPanel(new FlowLayout(FlowLayout.RIGHT));
@@ -147,6 +192,9 @@ public class MandelView implements MouseListener, KeyListener {
         pnlJuliaMain.add(pnlSave, BorderLayout.NORTH);
 
         frmJulia.setVisible(true);
+        
+        pnlMandel.initialiseXY();
+        pnlJulia.initialiseXY();
     }
 
     public static void main(String[] args) {
@@ -169,7 +217,7 @@ public class MandelView implements MouseListener, KeyListener {
                     } catch (IOException ex) {
                         Logger.getLogger(MandelView.class.getName()).log(Level.SEVERE, null, ex);
                     }
-                }else if(src == btnReset){
+                } else if (src == btnReset) {
                     pnlMandel.initialiseXY();
                     pnlMandel.setZoom(100);
                     pnlJulia.initialiseXY();
@@ -245,6 +293,37 @@ public class MandelView implements MouseListener, KeyListener {
     @Override
     public void keyReleased(KeyEvent e) {
         System.out.println("Key Released: " + e.getKeyCode());
+    }
+
+    @Override
+    public void mouseDragged(MouseEvent e) {
+        Object src = e.getSource();
+        /*if (src == pnlMandel){
+            if(pnlMandel.isOnZoomMode()){
+                System.out.println("Mandel Zoom drag");
+            }else{
+                System.out.println("Mandel Pan Drag");
+            }
+        }else if (src == pnlJulia){
+            if(pnlJulia.isOnZoomMode()){
+                System.out.println("Julia Zoom drag");
+            }else{
+                System.out.println("Julia Pan Drag");
+            }
+        }*/
+        if (src instanceof MandelController){
+            MandelController mdlControl = (MandelController) src;
+            if(mdlControl.isOnZoomMode()){
+                System.out.println(mdlControl.getName() + " Zoom drag");
+            }else{
+                System.out.println(mdlControl.getName() + " Pan Drag");
+            }
+        }
+    }
+
+    @Override
+    public void mouseMoved(MouseEvent e) {
+        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
 }

@@ -23,7 +23,7 @@ import javax.swing.JPanel;
  *
  * @author Lloyd
  */
-public class MandelController extends JPanel implements MouseListener, MouseMotionListener, KeyListener {
+public class MandelController extends JPanel implements MouseListener, KeyListener {
 
     private final MandelView view;
     private BufferedImage image;
@@ -325,14 +325,18 @@ public class MandelController extends JPanel implements MouseListener, MouseMoti
         this.image = image;
     }
 
-    @Override
-    public void mouseDragged(MouseEvent e) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    /**
+     * @return the onZoomMode
+     */
+    public boolean isOnZoomMode() {
+        return onZoomMode;
     }
 
-    @Override
-    public void mouseMoved(MouseEvent e) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    /**
+     * @param onZoomMode the onZoomMode to set
+     */
+    public void setOnZoomMode(boolean onZoomMode) {
+        this.onZoomMode = onZoomMode;
     }
 
 }
