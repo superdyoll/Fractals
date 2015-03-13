@@ -35,7 +35,7 @@ import javax.swing.*;
  */
 public class MandelView implements MouseListener, KeyListener, MouseMotionListener, ActionListener {
 
-    private final JLabel lblComplex = new JLabel();
+    private final JLabel lblBottom = new JLabel();
     private MandelController pnlJulia, pnlMandel;
 
     private JPanel pnlFavourites;
@@ -53,25 +53,42 @@ public class MandelView implements MouseListener, KeyListener, MouseMotionListen
      * @param filename
      * @throws IOException
      */
-    public void exportJulia(String filename) throws IOException {
-        File outputfile = new File(filename + ".jpg");
+    public String exportJulia(String filename) throws IOException {
+        filename = filename + ".jpg";
+        File outputfile = new File(filename);
         ImageIO.write(pnlJulia.getImage(), "jpg", outputfile);
+        return filename;
     }
 
+    /**Add the file to favourites
+     *
+     * @param fixed
+     * @param zoom
+     */
     public void saveAsFavourite(Complex fixed, int zoom) {
         FavButton favourite = getFavButton(fixed, zoom);
         favourite.addActionListener(this);
         pnlFavourites.add(favourite);
     }
 
+    /**Get the favourite button
+     *
+     * @param fixed
+     * @param zoom
+     * @return
+     */
     public FavButton getFavButton(Complex fixed, int zoom) {
         FavButton favourite = new FavButton("Julia " + fixed + " at zoom level " + zoom, fixed, zoom);
         favourite.setActionCommand("favourite");
         return favourite;
     }
 
+    /**
+     *
+     * @param point
+     */
     public void setComplex(Complex point) {
-        lblComplex.setText(point.toString());
+        lblBottom.setText(point.toString());
         pnlJulia.setFixed(point);
     }
 
@@ -154,13 +171,13 @@ public class MandelView implements MouseListener, KeyListener, MouseMotionListen
         pnlMandel.addMouseMotionListener(this);
         layers.setVisible(true);
 
-        lblComplex.setText("Click on a point to view the complex number");
+        lblBottom.setText("Click on a point to view the complex number");
 
         //Make complex point bit
         JPanel pnlComplex = new JPanel();
         pnlComplex.setBounds(100, 100, frmOuter.getWidth(), (int) (frmOuter.getHeight() * 0.01));
         pnlComplex.setLayout(new FlowLayout(FlowLayout.LEFT));
-        pnlComplex.add(lblComplex);
+        pnlComplex.add(lblBottom);
         pnlMain.add(pnlComplex, BorderLayout.SOUTH);
         pnlComplex.setVisible(true);
 
@@ -203,6 +220,8 @@ public class MandelView implements MouseListener, KeyListener, MouseMotionListen
         //Make Favourites Panel
         final JFrame frmFavourites = new JFrame("Favourites");
         frmFavourites.setBounds(100, 100, 400, 300);
+        
+        JLabel alert = new JLabel ("This is where you can save your favourite fractal");
 
         btnShowFavourites.setSelected(false);
         btnShowFavourites.addItemListener(new ItemListener() {
@@ -216,18 +235,19 @@ public class MandelView implements MouseListener, KeyListener, MouseMotionListen
         });
 
         pnlFavourites = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        pnlFavourites.setBounds(100, 100, 400, 300);
+        pnlFavourites.setBounds(100, 100, frmFavourites.getWidth(), frmFavourites.getHeight());
         pnlFavourites.setVisible(true);
 
         JScrollPane scroller = new JScrollPane();
         scroller.add(pnlFavourites);
         scroller.setVisible(true);
 
-        FavButton testButton = new FavButton("Test", new Complex(0,0), 100);
-        testButton.setVisible(true);
-        testButton.setActionCommand("favourite");
-        testButton.addActionListener(this);
-        pnlFavourites.add(testButton);
+        latestButton = new FavButton("My Favourite", new Complex(0.3199999928474426,-0.02666666731238365), 100);
+        latestButton.setVisible(true);
+        latestButton.setActionCommand("favourite");
+        latestButton.addActionListener(this);
+        pnlFavourites.add(alert);
+        pnlFavourites.add(latestButton);
         pnlJuliaMain.add(pnlFavourites, BorderLayout.SOUTH);
         
         
@@ -246,11 +266,14 @@ public class MandelView implements MouseListener, KeyListener, MouseMotionListen
             @Override
             public void run() {
                 if (src == btnExport) {
+                    //Make the filename out of the current date
                     Calendar calendar = new GregorianCalendar();
                     String time = calendar.get(Calendar.YEAR) + "-" + calendar.get(Calendar.MONTH) + 1 + "-" + calendar.get(Calendar.DAY_OF_MONTH) + "_" + calendar.get(Calendar.MILLISECOND);
                     System.out.println(time);
                     try {
-                        exportJulia("Julia_" + time);
+                        //Then export the file
+                        String filename = exportJulia("Julia_" + time);
+                        lblBottom.setText("File exported to " + filename);
                     } catch (IOException ex) {
                         Logger.getLogger(MandelView.class.getName()).log(Level.SEVERE, null, ex);
                     }
@@ -262,9 +285,10 @@ public class MandelView implements MouseListener, KeyListener, MouseMotionListen
                     txtIter.setText("570");
                     setIterations();
                 } else if (src == btnSave) {
-                    System.out.println("Saving " + pnlJulia.getFixed());
-                    latestButton = MandelView.this.getFavButton(pnlJulia.getFixed(), pnlJulia.getZoom());
-                    imageAdded = true;
+                    lblBottom.setText("Saving " + pnlJulia.getFixed());
+                    latestButton.setFixed(pnlJulia.getFixed());
+                    latestButton.setZoom(pnlJulia.getZoom());
+                    //imageAdded = true;
                 } else if (src == btnSet) {
                     System.out.println("Setting " + txtIter.getText());
                     setIterations();
@@ -277,10 +301,14 @@ public class MandelView implements MouseListener, KeyListener, MouseMotionListen
             pnlFavourites.add(latestButton);
             latestButton.addActionListener(this);
             latestButton.setVisible(true);
+            pnlFavourites.repaint();
             System.out.println("Added button " + latestButton);
         }
     }
 
+    /**Set the number of iterations
+     *
+     */
     public void setIterations() {
         int iterations = Integer.parseInt(txtIter.getText());
         pnlMandel.setIterations(iterations);
@@ -358,6 +386,10 @@ public class MandelView implements MouseListener, KeyListener, MouseMotionListen
         }
     }
 
+    /**
+     *
+     * @param args
+     */
     public static void main(String[] args) {
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());

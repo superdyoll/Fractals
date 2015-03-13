@@ -20,6 +20,12 @@ public class MandelModel {
     private MandelController mandelController;
     private BufferedImage image;
 
+    /**Calculate the mandel Point
+     *
+     * @param point
+     * @param iter
+     * @return
+     */
     public int calculateMandelPoint(Complex point, int iter) {
         Complex zNumber = point;
         while (iter > 0 && zNumber.modulusSquared() < 4) {
@@ -31,6 +37,13 @@ public class MandelModel {
         return iter;
     }
 
+    /**Calculate the Julia Point
+     *
+     * @param point
+     * @param fixed
+     * @param iter
+     * @return
+     */
     public int calculateJuliaPoint(Complex point, Complex fixed, int iter) {
         Complex zNumber = point.add(fixed);
         while (iter > 0 && zNumber.modulusSquared() < 4) {
@@ -41,6 +54,15 @@ public class MandelModel {
         return iter;
     }
 
+    /**Get the buffered image
+     *
+     * @param width
+     * @param height
+     * @param maxIterations
+     * @param mandelController
+     * @return
+     * @throws InterruptedException
+     */
     public BufferedImage drawFractal(int width, int height, int maxIterations, MandelController mandelController) throws InterruptedException {
         this.width = width;
         this.height = height;

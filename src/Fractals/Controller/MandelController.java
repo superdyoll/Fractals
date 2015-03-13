@@ -39,14 +39,29 @@ public class MandelController extends JPanel implements MouseListener,
             xCenter, yCenter;
     private AffineTransform transformer = new AffineTransform();
 
+    /**
+     *
+     * @param controller
+     */
     public MandelController(MandelView controller) {
         this(controller, false, 150);
     }
 
+    /**
+     *
+     * @param controller
+     * @param juliaSet
+     */
     public MandelController(MandelView controller, boolean juliaSet) {
         this(controller, juliaSet, 150);
     }
 
+    /**
+     *
+     * @param controller
+     * @param juliaSet
+     * @param zoom
+     */
     public MandelController(MandelView controller, boolean juliaSet, int zoom) {
         iterations = 570;
 
@@ -63,10 +78,17 @@ public class MandelController extends JPanel implements MouseListener,
         fixed = new Complex(0, 0);
     }
 
+    /**
+     *
+     */
     public void initialiseXY() {
         initialiseXY(true);
     }
 
+    /**
+     *
+     * @param doRepaint
+     */
     public void initialiseXY(boolean doRepaint) {
         imageRedrawn = true;
         xCenter = this.getWidth() / 2;
@@ -149,6 +171,9 @@ public class MandelController extends JPanel implements MouseListener,
         }
     }
 
+    /**
+     *
+     */
     public void panImage() {
         double difX = getEndMouseX() - getStartMouseX();
         double difY = getEndMouseY() - getStartMouseY();
@@ -236,7 +261,7 @@ public class MandelController extends JPanel implements MouseListener,
             setXCenter((int) (offsetX), false);
             setYCenter((int) (offsetY), false);
 
-            int incrZoom = 0;
+            int incrZoom = (int) (zoom / Math.log(zoom));
             zoom += incrZoom;
 
             imageRedrawn = true;
@@ -245,6 +270,9 @@ public class MandelController extends JPanel implements MouseListener,
         }
     }
 
+    /**
+     *
+     */
     public void resetMouseXY() {
         setStartMouseX(0);
         setStartMouseY(0);
@@ -264,18 +292,34 @@ public class MandelController extends JPanel implements MouseListener,
         // change body of generated methods, choose Tools | Templates.
     }
 
+    /**
+     *
+     * @param amount
+     */
     public void goLeft(double amount) {
         setXCenter(getXCenter() + amount);
     }
 
+    /**
+     *
+     * @param amount
+     */
     public void goRight(double amount) {
         setXCenter(getXCenter() - amount);
     }
 
+    /**
+     *
+     * @param amount
+     */
     public void goUp(double amount) {
         setYCenter(getYCenter() + amount);
     }
 
+    /**
+     *
+     * @param amount
+     */
     public void goDown(double amount) {
         setYCenter(getYCenter() - amount);
     }
@@ -310,6 +354,7 @@ public class MandelController extends JPanel implements MouseListener,
 
     /**
      * @param fixed the fixed to set
+     * @param doRepaint
      */
     public void setFixed(Complex fixed, boolean doRepaint) {
         this.fixed = fixed;
@@ -326,12 +371,17 @@ public class MandelController extends JPanel implements MouseListener,
         return zoom;
     }
 
+    /**
+     *
+     * @param currentZoom
+     */
     public void setZoom(int currentZoom) {
         setZoom(currentZoom, true);
     }
 
     /**
      * @param currentZoom the zoom to set
+     * @param doRepaint
      */
     public void setZoom(int currentZoom, boolean doRepaint) {
         this.zoom = currentZoom;
@@ -341,12 +391,18 @@ public class MandelController extends JPanel implements MouseListener,
         }
     }
 
+    /**
+     *
+     */
     public void zoomIn() {
         zoom += zoom * 0.1;
         imageRedrawn = true;
         this.repaint();
     }
 
+    /**
+     *
+     */
     public void zoomOut() {
         zoom -= zoom * 0.1;
         imageRedrawn = true;
@@ -360,12 +416,17 @@ public class MandelController extends JPanel implements MouseListener,
         return xCenter;
     }
 
+    /**
+     *
+     * @param currentXCenter
+     */
     public void setXCenter(double currentXCenter) {
         setXCenter(currentXCenter, true);
     }
 
     /**
      * @param currentXCenter the xCenter to set
+     * @param doRepaint
      */
     public void setXCenter(double currentXCenter, boolean doRepaint) {
         this.xCenter = currentXCenter;
@@ -382,12 +443,17 @@ public class MandelController extends JPanel implements MouseListener,
         return yCenter;
     }
 
+    /**
+     *
+     * @param currentYCenter
+     */
     public void setYCenter(double currentYCenter) {
         setYCenter(currentYCenter, true);
     }
 
     /**
      * @param currentYCenter the yCenter to set
+     * @param doRepaint
      */
     public void setYCenter(double currentYCenter, boolean doRepaint) {
         this.yCenter = currentYCenter;
@@ -418,6 +484,10 @@ public class MandelController extends JPanel implements MouseListener,
         return iterations;
     }
 
+    /**
+     *
+     * @param iterations
+     */
     public void setIterations(int iterations) {
         setIterations(iterations, true);
     }
@@ -579,12 +649,15 @@ public class MandelController extends JPanel implements MouseListener,
     @Override
     public void mouseWheelMoved(MouseWheelEvent e) {
         System.out.println("Scroll amount " + e.getUnitsToScroll());
+        
+        System.out.println("Position " + e.getX() + " Y " + e.getY());
+        setXCenter(xCenter + Math.signum(e.getUnitsToScroll())* (getWidth()/(zoom)), false);
+        setYCenter(yCenter + Math.signum(e.getUnitsToScroll())* (getHeight()/(zoom)));
+        
         int zoomAmount = e.getUnitsToScroll() * (int) (zoom / Math.log(zoom));
         zoom -= zoomAmount;
         System.out.println("Zoom " + zoom);
-        System.out.println("Position " + e.getX() + " Y " + e.getY());
-        setXCenter(xCenter + getWidth()/2, false);
-        setYCenter(yCenter + getHeight()/2);
+        
         imageRedrawn = true;
         this.repaint();
     }
