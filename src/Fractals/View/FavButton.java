@@ -50,5 +50,9 @@ public class FavButton extends JButton{
         this.zoom = zoom;
     }
     
+    @Override
+    public String toString(){
+        return fixed + " z: " + zoom;
+    }
     
 }

@@ -32,7 +32,7 @@ public class MandelController extends JPanel implements MouseListener, MouseWhee
     private final MandelView view;
     private BufferedImage image;
     private int zoom, iterations;
-    private boolean juliaSet, imageDrawn, onZoomMode, thumbnail;
+    private boolean juliaSet, imageDrawn, onZoomMode, thumbnail, imageRedrawn;
     private Complex fixed;
     private double startMouseX, startMouseY, endMouseX, endMouseY, panX, panY, xCenter, yCenter;
     private AffineTransform transformer = new AffineTransform();
@@ -47,6 +47,8 @@ public class MandelController extends JPanel implements MouseListener, MouseWhee
 
     public MandelController(MandelView controller, boolean juliaSet, int zoom) {
         iterations = 570;
+
+        imageRedrawn = true;
 
         this.juliaSet = juliaSet;
         setZoom(zoom);
@@ -64,6 +66,7 @@ public class MandelController extends JPanel implements MouseListener, MouseWhee
     }
 
     public void initialiseXY(boolean doRepaint) {
+        imageRedrawn = true;
         xCenter = this.getWidth() / 2;
         yCenter = this.getHeight() / 2;
         if (doRepaint) {
@@ -156,18 +159,34 @@ public class MandelController extends JPanel implements MouseListener, MouseWhee
 
         setPanX(difX / (Math.log(zoom)));
         setPanY(difY / (Math.log(zoom)));
-        setXCenter((int) (xCenter + panX));
+        setXCenter((int) (xCenter + panX), false);
         setYCenter((int) (yCenter + panY));
+        imageRedrawn = true;
         repaint();
     }
 
     @Override
     public void paintComponent(Graphics g) {
         try {
-            setImage(new MandelModel().drawFractal(getWidth(), getHeight(), getIterations(), this));
+            if (imageRedrawn) {
+                setImage(new MandelModel().drawFractal(getWidth(), getHeight(), getIterations(), this));
+                imageRedrawn = false;
+            }
             g.drawImage(getImage(), 0, 0, this);
-            Graphics2D g2d = (Graphics2D) g;
-            g2d.setTransform(transformer);
+            //Graphics2D g2d = (Graphics2D) g;
+            //g2d.setTransform(transformer);
+
+            if (isOnZoomMode()) {
+                Color zoomColour = new Color(255, 255, 255, 100);
+                g.setColor(zoomColour);
+                int topLeftX = (int) Math.min(getStartMouseX(), getEndMouseX());
+                int topLeftY = (int) Math.min(getStartMouseY(), getEndMouseY());
+                int botRightX = (int) Math.max(getStartMouseX(), getEndMouseX());
+                int botRightY = (int) Math.max(getStartMouseY(), getEndMouseY());
+                int difX = botRightX - topLeftX;
+                int difY = botRightY - topLeftY;
+                g.fillRect(topLeftX, topLeftY, difX, difY);
+            }
         } catch (InterruptedException ex) {
             Logger.getLogger(MandelController.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -181,6 +200,7 @@ public class MandelController extends JPanel implements MouseListener, MouseWhee
                 view.setComplex(point);
             }
             getTransformer().translate(5, 5);
+            imageRedrawn = true;
             this.repaint();
         }
     }
@@ -197,21 +217,34 @@ public class MandelController extends JPanel implements MouseListener, MouseWhee
             setEndMouseX(e.getX());
             setEndMouseY(e.getY());
             //Find the difference
-            double difX = getEndMouseX() - getStartMouseX();
-            double difY = getEndMouseY() - getStartMouseY();
+            int topLeftX = (int) Math.min(getStartMouseX(), getEndMouseX());
+            int topLeftY = (int) Math.min(getStartMouseY(), getEndMouseY());
+            int botRightX = (int) Math.max(getStartMouseX(), getEndMouseX());
+            int botRightY = (int) Math.max(getStartMouseY(), getEndMouseY());
+            int difX = botRightX - topLeftX;
+            int difY = botRightY - topLeftY;
 
             //Work out the center offset
-            double offsetX = getStartMouseX() + difX / 2;
-            double offsetY = getStartMouseY() + difY / 2;
+            double offsetX = getWidth() / 2 + (difX / 2);
+            double offsetY = getHeight()/2  + (difY / 2);
             System.out.println("X difference: " + difX + " Y difference: " + difY);
-            xCenter = offsetX / zoom;
-            yCenter = offsetY / zoom;
-
+            setXCenter((int) (xCenter + offsetX), false);
+            setYCenter((int) (yCenter + offsetY), false);
+            
             int incrZoom = 100;
             zoom += incrZoom;
 
+            imageRedrawn = true;
             this.repaint();
+            resetMouseXY();
         }
+    }
+
+    public void resetMouseXY() {
+        setStartMouseX(0);
+        setStartMouseY(0);
+        setEndMouseX(0);
+        setEndMouseY(0);
     }
 
     @Override
@@ -274,6 +307,7 @@ public class MandelController extends JPanel implements MouseListener, MouseWhee
     public void setFixed(Complex fixed, boolean doRepaint) {
         this.fixed = fixed;
         if (doRepaint) {
+            imageRedrawn = true;
             this.repaint();
         }
     }
@@ -295,17 +329,20 @@ public class MandelController extends JPanel implements MouseListener, MouseWhee
     public void setZoom(int currentZoom, boolean doRepaint) {
         this.zoom = currentZoom;
         if (doRepaint) {
+            imageRedrawn = true;
             this.repaint();
         }
     }
 
     public void zoomIn() {
         zoom += zoom * 0.1;
+        imageRedrawn = true;
         this.repaint();
     }
 
     public void zoomOut() {
         zoom -= zoom * 0.1;
+        imageRedrawn = true;
         this.repaint();
     }
 
@@ -326,6 +363,7 @@ public class MandelController extends JPanel implements MouseListener, MouseWhee
     public void setXCenter(double currentXCenter, boolean doRepaint) {
         this.xCenter = currentXCenter;
         if (doRepaint) {
+            imageRedrawn = true;
             this.repaint();
         }
     }
@@ -347,6 +385,7 @@ public class MandelController extends JPanel implements MouseListener, MouseWhee
     public void setYCenter(double currentYCenter, boolean doRepaint) {
         this.yCenter = currentYCenter;
         if (doRepaint) {
+            imageRedrawn = true;
             this.repaint();
         }
     }
@@ -383,6 +422,7 @@ public class MandelController extends JPanel implements MouseListener, MouseWhee
     public void setIterations(int iterations, boolean doRepaint) {
         this.iterations = iterations;
         if (doRepaint) {
+            imageRedrawn = true;
             this.repaint();
         }
     }
@@ -399,6 +439,7 @@ public class MandelController extends JPanel implements MouseListener, MouseWhee
      */
     public void setImage(BufferedImage image) {
         this.image = image;
+        imageRedrawn = true;
         this.repaint();
     }
 
@@ -531,11 +572,11 @@ public class MandelController extends JPanel implements MouseListener, MouseWhee
     @Override
     public void mouseWheelMoved(MouseWheelEvent e) {
         System.out.println("Scroll amount " + e.getUnitsToScroll());
-        int zoomAmount = e.getUnitsToScroll() * (int) (zoom/Math.log(zoom));
+        int zoomAmount = e.getUnitsToScroll() * (int) (zoom / Math.log(zoom));
         zoom -= zoomAmount;
         System.out.println("Zoom " + zoom);
         System.out.println("Position " + e.getX() + " Y " + e.getY());
-        setXCenter(e.getX()- getXCenter());
+        setXCenter(e.getX() - getXCenter(), false);
         setYCenter(e.getY() - getYCenter());
     }
 

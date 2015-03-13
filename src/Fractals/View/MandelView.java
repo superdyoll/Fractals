@@ -42,7 +42,7 @@ public class MandelView implements MouseListener, KeyListener, MouseMotionListen
     private JButton btnSet, btnExport, btnReset, btnSave;
     private JToggleButton btnZoomMode, btnShowJulia, btnShowFavourites;
     private JTextField txtIter;
-    private boolean mousePressed, imageAdded;
+    private boolean mousePressed, imageAdded = false;
     private FavButton latestButton;
 
     /**
@@ -63,7 +63,7 @@ public class MandelView implements MouseListener, KeyListener, MouseMotionListen
         favourite.addActionListener(this);
         pnlFavourites.add(favourite);
     }
-    
+
     public FavButton getFavButton(Complex fixed, int zoom) {
         FavButton favourite = new FavButton("Julia " + fixed + " at zoom level " + zoom, fixed, zoom);
         favourite.setActionCommand("favourite");
@@ -112,13 +112,13 @@ public class MandelView implements MouseListener, KeyListener, MouseMotionListen
         btnZoomMode.addItemListener(new ItemListener() {
             public void itemStateChanged(ItemEvent ev) {
                 if (ev.getStateChange() == ItemEvent.SELECTED) {
-                    System.out.println("button is selected");
+                    btnZoomMode.setText("Pan Mode");
                     pnlMandel.setOnZoomMode(true);
                     pnlMandel.setCursor(new Cursor(Cursor.CROSSHAIR_CURSOR));
                     pnlJulia.setOnZoomMode(true);
                     pnlJulia.setCursor(new Cursor(Cursor.CROSSHAIR_CURSOR));
                 } else if (ev.getStateChange() == ItemEvent.DESELECTED) {
-                    System.out.println("button is not selected");
+                    btnZoomMode.setText("Zoom Mode");
                     pnlMandel.setOnZoomMode(false);
                     pnlMandel.setCursor(new Cursor(Cursor.HAND_CURSOR));
                     pnlJulia.setOnZoomMode(false);
@@ -216,20 +216,27 @@ public class MandelView implements MouseListener, KeyListener, MouseMotionListen
         });
 
         pnlFavourites = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        pnlFavourites.setBounds(100, 100, 400, 300);
+        pnlFavourites.setVisible(true);
 
         JScrollPane scroller = new JScrollPane();
         scroller.add(pnlFavourites);
+        scroller.setVisible(true);
 
+        FavButton testButton = new FavButton("Test", new Complex(0,0), 100);
+        testButton.setVisible(true);
+        testButton.setActionCommand("favourite");
+        testButton.addActionListener(this);
+        pnlFavourites.add(testButton);
+        pnlJuliaMain.add(pnlFavourites, BorderLayout.SOUTH);
+        
+        
         Container pnlFavMain = frmFavourites.getContentPane();
-        pnlFavMain.add(scroller);
+        pnlFavMain.add(pnlFavourites);
+        pnlFavMain.setVisible(true);
 
         pnlMandel.initialiseXY();
         pnlJulia.initialiseXY();
-    }
-
-    public static void main(String[] args) {
-        MandelView mandel = new MandelView();
-        mandel.drawFrame();
     }
 
     @Override
@@ -265,9 +272,12 @@ public class MandelView implements MouseListener, KeyListener, MouseMotionListen
             }
 
         }.start();
-        if (imageAdded){
+        if (imageAdded) {
             imageAdded = false;
             pnlFavourites.add(latestButton);
+            latestButton.addActionListener(this);
+            latestButton.setVisible(true);
+            System.out.println("Added button " + latestButton);
         }
     }
 
@@ -279,45 +289,13 @@ public class MandelView implements MouseListener, KeyListener, MouseMotionListen
 
     @Override
     public void mousePressed(MouseEvent e) {
-        /*mousePressed = true;
-         final Object src = e.getSource();
-         new Thread() {
-         @Override
-         public void run() {
-         while (mousePressed) {
-         /*if (src == btnZoomIn) {
-         pnlMandel.zoomIn();
-         System.out.println(pnlMandel.getZoom());
-         } else if (src == btnZoomOut) {
-         pnlMandel.zoomOut();
-         } else if (src == btnUp) {
-         pnlMandel.goUp(1);
-         } else if (src == btnDown) {
-         pnlMandel.goDown(1);
-         } else if (src == btnLeft) {
-         pnlMandel.goLeft(1);
-         } else if (src == btnRight) {
-         pnlMandel.goRight(1);
-         }
-         pnlMandel.setImageDrawn(false);
-         pnlMandel.repaint();    
-         while (!pnlMandel.isImageDrawn()) {
-         try {
-         sleep(100);
-         } catch (InterruptedException ex) {
-         Logger.getLogger(MandelController.class.getName()).log(Level.SEVERE, null, ex);
-         }
-         }
-         }
-         }
-
-         }.start();*/
+        //mousePressed = true;
 
     }
 
     @Override
     public void mouseReleased(MouseEvent e) {
-        mousePressed = false;
+        //mousePressed = false;
     }
 
     @Override
@@ -353,10 +331,12 @@ public class MandelView implements MouseListener, KeyListener, MouseMotionListen
             //If it is cast it as one to enable methods
             MandelController mdlControl = (MandelController) src;
             //See if zoom mode is enabled
+            mdlControl.setEndMouseX(e.getX());
+            mdlControl.setEndMouseY(e.getY());
             if (!mdlControl.isOnZoomMode()) {
-                mdlControl.setEndMouseX(e.getX());
-                mdlControl.setEndMouseY(e.getY());
                 mdlControl.panImage();
+            }else{
+                mdlControl.repaint();
             }
         }
     }
@@ -378,4 +358,19 @@ public class MandelView implements MouseListener, KeyListener, MouseMotionListen
         }
     }
 
+    public static void main(String[] args) {
+        try {
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(MandelView.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (InstantiationException ex) {
+            Logger.getLogger(MandelView.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IllegalAccessException ex) {
+            Logger.getLogger(MandelView.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (UnsupportedLookAndFeelException ex) {
+            Logger.getLogger(MandelView.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        MandelView mandel = new MandelView();
+        mandel.drawFrame();
+    }
 }
