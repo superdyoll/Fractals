@@ -225,12 +225,12 @@ public class MandelController extends JPanel implements MouseListener, MouseWhee
             int difY = botRightY - topLeftY;
 
             //Work out the center offset
-            double offsetX = getWidth() / 2 + (difX / 2);
-            double offsetY = getHeight()/2  + (difY / 2);
+            double offsetX = topLeftX + (difX / 2);
+            double offsetY = topLeftY + (difY / 2);
             System.out.println("X difference: " + difX + " Y difference: " + difY);
             setXCenter((int) (xCenter + offsetX), false);
             setYCenter((int) (yCenter + offsetY), false);
-            
+
             int incrZoom = 100;
             zoom += incrZoom;
 
