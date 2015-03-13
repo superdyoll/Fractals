@@ -231,10 +231,12 @@ public class MandelController extends JPanel implements MouseListener,
             double offsetY = topLeftY + (difY / 2);
             System.out.println("X difference: " + difX + " Y difference: "
                     + difY);
-            setXCenter((int) (xCenter + offsetX), false);
-            setYCenter((int) (yCenter + offsetY), false);
+            
+            //Add the center offset
+            setXCenter((int) (offsetX), false);
+            setYCenter((int) (offsetY), false);
 
-            int incrZoom = 100;
+            int incrZoom = 0;
             zoom += incrZoom;
 
             imageRedrawn = true;
@@ -581,8 +583,8 @@ public class MandelController extends JPanel implements MouseListener,
         zoom -= zoomAmount;
         System.out.println("Zoom " + zoom);
         System.out.println("Position " + e.getX() + " Y " + e.getY());
-        setXCenter(e.getX() - getXCenter(), false);
-        setYCenter(e.getY() - getYCenter());
+        //setXCenter(e.getX(), false);
+        //setYCenter(e.getY());
     }
 
 }
