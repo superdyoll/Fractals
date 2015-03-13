@@ -265,7 +265,10 @@ public class MandelView implements MouseListener, KeyListener, MouseMotionListen
             }
 
         }.start();
-        
+        if (imageAdded){
+            imageAdded = false;
+            pnlFavourites.add(latestButton);
+        }
     }
 
     public void setIterations() {
