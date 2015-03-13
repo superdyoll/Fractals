@@ -36,14 +36,15 @@ public class MandelView implements MouseListener, KeyListener, MouseMotionListen
     private final JLabel lblComplex = new JLabel();
     private MandelController pnlJulia, pnlMandel;
 
-    private JButton btnSet, btnSave, btnReset;
-    private JToggleButton btnZoomMode, btnShowJulia;
+    private JPanel pnlFavourites;
+    private JButton btnSet, btnExport, btnReset, btnSave;
+    private JToggleButton btnZoomMode, btnShowJulia, btnShowFavourites;
     private JTextField txtIter;
     private boolean mousePressed;
 
-
-    /**Turn the image into a file
-     * 
+    /**
+     * Turn the image into a file
+     *
      * filename denotes what the file should be called
      *
      * @param filename
@@ -59,7 +60,8 @@ public class MandelView implements MouseListener, KeyListener, MouseMotionListen
         pnlJulia.setFixed(point);
     }
 
-    /**Draw all the main frame objects
+    /**
+     * Draw all the main frame objects
      *
      */
     public void drawFrame() {
@@ -78,15 +80,17 @@ public class MandelView implements MouseListener, KeyListener, MouseMotionListen
 
         //Create all Buttons
         this.btnSet = new JButton("Set");
-        this.btnSave = new JButton("Save");
+        this.btnExport = new JButton("Export");
+        this.btnSave = new JButton("Save to favourites");
         this.btnReset = new JButton("Reset everything");
         this.btnZoomMode = new JToggleButton("Zoom Mode");
         this.btnShowJulia = new JToggleButton("Show Julia");
-        this.txtIter = new JTextField();
-        
+        this.btnShowFavourites = new JToggleButton("Show Favourites");
+        this.txtIter = new JTextField("570", 5);
+
         //Add Mouse Listeners        
         btnSet.addMouseListener(this);
-        btnSave.addMouseListener(this);
+        btnExport.addMouseListener(this);
         btnReset.addMouseListener(this);
 
         btnZoomMode.addItemListener(new ItemListener() {
@@ -112,13 +116,13 @@ public class MandelView implements MouseListener, KeyListener, MouseMotionListen
         pnlControl.add(txtIter);
         pnlControl.add(btnSet);
 
-
         JPanel pnlNav = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         pnlNav.setOpaque(false);
         pnlNav.add(pnlControl);
         pnlNav.add(btnReset);
         pnlNav.add(btnZoomMode);
         pnlNav.add(btnShowJulia);
+        pnlNav.add(btnShowFavourites);
 
         layers.add(pnlNav, BorderLayout.NORTH, 0);
         pnlNav.setVisible(true);
@@ -151,7 +155,7 @@ public class MandelView implements MouseListener, KeyListener, MouseMotionListen
         //Make Julia frame
         final JFrame frmJulia = new JFrame("Julia Set");
         frmJulia.setBounds(100, 100, 400, 300);
-        
+
         btnShowJulia.setSelected(true);
         btnShowJulia.addItemListener(new ItemListener() {
             public void itemStateChanged(ItemEvent ev) {
@@ -174,11 +178,35 @@ public class MandelView implements MouseListener, KeyListener, MouseMotionListen
 
         //MakeSave panel
         JPanel pnlSave = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        pnlSave.add(btnExport);
         pnlSave.add(btnSave);
         pnlJuliaMain.add(pnlSave, BorderLayout.NORTH);
 
         frmJulia.setVisible(true);
-        
+
+        //Make Favourites Panel
+        final JFrame frmFavourites = new JFrame("Favourites");
+        frmFavourites.setBounds(100, 100, 400, 300);
+
+        btnShowFavourites.setSelected(false);
+        btnShowFavourites.addItemListener(new ItemListener() {
+            public void itemStateChanged(ItemEvent ev) {
+                if (ev.getStateChange() == ItemEvent.SELECTED) {
+                    frmFavourites.setVisible(true);
+                } else if (ev.getStateChange() == ItemEvent.DESELECTED) {
+                    frmFavourites.setVisible(false);
+                }
+            }
+        });
+
+        pnlFavourites = new JPanel(new GridLayout(5, 3, 1, 1));
+
+        JScrollPane scroller = new JScrollPane();
+        scroller.add(pnlFavourites);
+
+        Container pnlFavMain = frmFavourites.getContentPane();
+        pnlFavMain.add(scroller);
+
         pnlMandel.initialiseXY();
         pnlJulia.initialiseXY();
     }
@@ -194,7 +222,7 @@ public class MandelView implements MouseListener, KeyListener, MouseMotionListen
         new Thread() {
             @Override
             public void run() {
-                if (src == btnSave) {
+                if (src == btnExport) {
                     Calendar calendar = new GregorianCalendar();
                     String time = calendar.get(Calendar.YEAR) + "-" + calendar.get(Calendar.MONTH) + 1 + "-" + calendar.get(Calendar.DAY_OF_MONTH) + "_" + calendar.get(Calendar.MILLISECOND);
                     System.out.println(time);
@@ -208,6 +236,16 @@ public class MandelView implements MouseListener, KeyListener, MouseMotionListen
                     pnlMandel.setZoom(100);
                     pnlJulia.initialiseXY(false);
                     pnlJulia.setZoom(100);
+                } else if (src == btnSave) {
+                    System.out.println("Saving " + pnlJulia.getFixed());
+                    /*MandelController favourite;
+                     favourite = new MandelController(MandelView.this,true);
+                     favourite.setFixed(pnlJulia.getFixed());
+                     favourite.setZoom(pnlJulia.getZoom());
+                     pnlFavourites.add(favourite);*/
+
+                } else if (src == btnSet) {
+                    System.out.println("Setting " + txtIter.getText());
                 }
             }
 
@@ -217,44 +255,44 @@ public class MandelView implements MouseListener, KeyListener, MouseMotionListen
     @Override
     public void mousePressed(MouseEvent e) {
         /*mousePressed = true;
-        final Object src = e.getSource();
-        new Thread() {
-            @Override
-            public void run() {
-                while (mousePressed) {
-                    /*if (src == btnZoomIn) {
-                        pnlMandel.zoomIn();
-                        System.out.println(pnlMandel.getZoom());
-                    } else if (src == btnZoomOut) {
-                        pnlMandel.zoomOut();
-                    } else if (src == btnUp) {
-                        pnlMandel.goUp(1);
-                    } else if (src == btnDown) {
-                        pnlMandel.goDown(1);
-                    } else if (src == btnLeft) {
-                        pnlMandel.goLeft(1);
-                    } else if (src == btnRight) {
-                        pnlMandel.goRight(1);
-                    }
-                    pnlMandel.setImageDrawn(false);
-                    pnlMandel.repaint();    
-                    while (!pnlMandel.isImageDrawn()) {
-                        try {
-                            sleep(100);
-                        } catch (InterruptedException ex) {
-                            Logger.getLogger(MandelController.class.getName()).log(Level.SEVERE, null, ex);
-                        }
-                    }
-                }
-            }
+         final Object src = e.getSource();
+         new Thread() {
+         @Override
+         public void run() {
+         while (mousePressed) {
+         /*if (src == btnZoomIn) {
+         pnlMandel.zoomIn();
+         System.out.println(pnlMandel.getZoom());
+         } else if (src == btnZoomOut) {
+         pnlMandel.zoomOut();
+         } else if (src == btnUp) {
+         pnlMandel.goUp(1);
+         } else if (src == btnDown) {
+         pnlMandel.goDown(1);
+         } else if (src == btnLeft) {
+         pnlMandel.goLeft(1);
+         } else if (src == btnRight) {
+         pnlMandel.goRight(1);
+         }
+         pnlMandel.setImageDrawn(false);
+         pnlMandel.repaint();    
+         while (!pnlMandel.isImageDrawn()) {
+         try {
+         sleep(100);
+         } catch (InterruptedException ex) {
+         Logger.getLogger(MandelController.class.getName()).log(Level.SEVERE, null, ex);
+         }
+         }
+         }
+         }
 
-        }.start();*/
-        
+         }.start();*/
+
     }
 
     @Override
     public void mouseReleased(MouseEvent e) {
-       mousePressed = false;
+        mousePressed = false;
     }
 
     @Override
@@ -286,11 +324,11 @@ public class MandelView implements MouseListener, KeyListener, MouseMotionListen
     public void mouseDragged(MouseEvent e) {
         Object src = e.getSource();
         //Check the object clicked on is a fractal
-        if (src instanceof MandelController){
+        if (src instanceof MandelController) {
             //If it is cast it as one to enable methods
             MandelController mdlControl = (MandelController) src;
             //See if zoom mode is enabled
-            if(!mdlControl.isOnZoomMode()){
+            if (!mdlControl.isOnZoomMode()) {
                 mdlControl.setEndMouseX(e.getX());
                 mdlControl.setEndMouseY(e.getY());
                 mdlControl.panImage();

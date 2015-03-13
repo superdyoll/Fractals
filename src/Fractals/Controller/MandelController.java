@@ -13,6 +13,8 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.util.logging.Level;
@@ -25,14 +27,14 @@ import javax.swing.JPanel;
  *
  * @author Lloyd
  */
-public class MandelController extends JPanel implements MouseListener, KeyListener {
+public class MandelController extends JPanel implements MouseListener, MouseWheelListener {
 
     private final MandelView view;
     private BufferedImage image;
-    private int zoom, xCenter, yCenter, iterations;
-    private boolean juliaSet, imageDrawn, onZoomMode;
+    private int zoom, iterations;
+    private boolean juliaSet, imageDrawn, onZoomMode, thumbnail;
     private Complex fixed;
-    private double startMouseX, startMouseY, endMouseX, endMouseY, panX, panY;
+    private double startMouseX, startMouseY, endMouseX, endMouseY, panX, panY, xCenter, yCenter;
     private AffineTransform transformer = new AffineTransform();
 
     public MandelController(MandelView controller) {
@@ -51,7 +53,8 @@ public class MandelController extends JPanel implements MouseListener, KeyListen
         //setBounds(100, 100, 800, 600);
 
         addMouseListener(this);
-        addKeyListener(this);
+        addMouseWheelListener(this);
+
         view = controller;
         fixed = new Complex(0, 0);
     }
@@ -140,19 +143,19 @@ public class MandelController extends JPanel implements MouseListener, KeyListen
             return new Color(0, 0, 0);
         }
     }
-    
-    public void panImage(){
+
+    public void panImage() {
         AffineTransform panTranslator = new AffineTransform();
         double difX = getEndMouseX() - getStartMouseX();
         double difY = getEndMouseY() - getStartMouseY();
         //setPanX(getPanX() + difX/zoom);
         //setPanY(getPanY() + difY/zoom);
-        System.out.println(panX + " " + panY);
+        //System.out.println(panX + " " + panY);
         //panTranslator.setToTranslation(getPanX(),getPanY());
         //transformer.concatenate(panTranslator);
-        
-        setPanX(difX/zoom);
-        setPanY(difY/zoom);
+
+        setPanX(difX / (Math.log(zoom)));
+        setPanY(difY / (Math.log(zoom)));
         setXCenter((int) (xCenter + panX));
         setYCenter((int) (yCenter + panY));
         repaint();
@@ -160,20 +163,26 @@ public class MandelController extends JPanel implements MouseListener, KeyListen
 
     @Override
     public void paintComponent(Graphics g) {
-        setImage(new MandelModel().drawFractal(getWidth(), getHeight(), getIterations(), this));
-        g.drawImage(getImage(), 0, 0, this);
-        Graphics2D g2d = (Graphics2D) g;
-        g2d.setTransform(transformer);
+        try {
+            setImage(new MandelModel().drawFractal(getWidth(), getHeight(), getIterations(), this));
+            g.drawImage(getImage(), 0, 0, this);
+            Graphics2D g2d = (Graphics2D) g;
+            g2d.setTransform(transformer);
+        } catch (InterruptedException ex) {
+            Logger.getLogger(MandelController.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     @Override
     public void mouseClicked(MouseEvent e) {
-        if (!isJuliaSet()) {
-            Complex point = new Complex(((float) (e.getX() - getXCenter()) / getZoom()), ((float) (e.getY() - getYCenter()) / getZoom()));
-            view.setComplex(point);
+        if (!isThumbnail()) {
+            if (!isJuliaSet()) {
+                Complex point = new Complex(((float) (e.getX() - getXCenter()) / getZoom()), ((float) (e.getY() - getYCenter()) / getZoom()));
+                view.setComplex(point);
+            }
+            getTransformer().translate(5, 5);
+            this.repaint();
         }
-        getTransformer().translate(5,5);
-        this.repaint();
     }
 
     @Override
@@ -184,16 +193,25 @@ public class MandelController extends JPanel implements MouseListener, KeyListen
 
     @Override
     public void mouseReleased(MouseEvent e) {
-        setEndMouseX(e.getX());
-        setEndMouseY(e.getY());
-        double difX = getEndMouseX() - getStartMouseX();
-        double difY = getEndMouseY() - getStartMouseY();
-        setPanX(difX/zoom);
-        setPanY(difY/zoom);
-        System.out.println("X difference: " + difX + " Y difference: " + difY);
-        double centerX = getXCenter() + panX;
-        double centerY = getYCenter() + panY;
-        System.out.println("X center " + centerX + " Y center " + centerY);
+        if (onZoomMode) {
+            setEndMouseX(e.getX());
+            setEndMouseY(e.getY());
+            //Find the difference
+            double difX = getEndMouseX() - getStartMouseX();
+            double difY = getEndMouseY() - getStartMouseY();
+
+            //Work out the center offset
+            double offsetX = getStartMouseX() + difX / 2;
+            double offsetY = getStartMouseY() + difY / 2;
+            System.out.println("X difference: " + difX + " Y difference: " + difY);
+            xCenter = offsetX / zoom;
+            yCenter = offsetY / zoom;
+
+            int incrZoom = 100;
+            zoom += incrZoom;
+
+            this.repaint();
+        }
     }
 
     @Override
@@ -206,44 +224,20 @@ public class MandelController extends JPanel implements MouseListener, KeyListen
         //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
-    @Override
-    public void keyTyped(KeyEvent e) {
-        System.out.println("Key Typed");
-        if (e.getKeyCode() == KeyEvent.VK_UP) {
-            goUp(1);
-        } else if (e.getKeyCode() == KeyEvent.VK_DOWN) {
-            goDown(1);
-        } else if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
-            goRight(1);
-        } else if (e.getKeyCode() == KeyEvent.VK_LEFT) {
-            goLeft(1);
-        }
-    }
-
-    public void goLeft(int amount) {
+    public void goLeft(double amount) {
         setXCenter(getXCenter() + amount);
     }
 
-    public void goRight(int amount) {
+    public void goRight(double amount) {
         setXCenter(getXCenter() - amount);
     }
 
-    public void goUp(int amount) {
+    public void goUp(double amount) {
         setYCenter(getYCenter() + amount);
     }
 
-    public void goDown(int amount) {
+    public void goDown(double amount) {
         setYCenter(getYCenter() - amount);
-    }
-
-    @Override
-    public void keyPressed(KeyEvent e) {
-        System.out.println("Key Pressed: " + e.getKeyCode());
-    }
-
-    @Override
-    public void keyReleased(KeyEvent e) {
-        System.out.println("Key Released: " + e.getKeyCode());
     }
 
     /**
@@ -318,18 +312,18 @@ public class MandelController extends JPanel implements MouseListener, KeyListen
     /**
      * @return the xCenter
      */
-    public int getXCenter() {
+    public double getXCenter() {
         return xCenter;
     }
 
-    public void setXCenter(int currentXCenter) {
+    public void setXCenter(double currentXCenter) {
         setXCenter(currentXCenter, true);
     }
 
     /**
      * @param currentXCenter the xCenter to set
      */
-    public void setXCenter(int currentXCenter, boolean doRepaint) {
+    public void setXCenter(double currentXCenter, boolean doRepaint) {
         this.xCenter = currentXCenter;
         if (doRepaint) {
             this.repaint();
@@ -339,18 +333,18 @@ public class MandelController extends JPanel implements MouseListener, KeyListen
     /**
      * @return the yCenter
      */
-    public int getYCenter() {
+    public double getYCenter() {
         return yCenter;
     }
 
-    public void setYCenter(int currentYCenter) {
+    public void setYCenter(double currentYCenter) {
         setYCenter(currentYCenter, true);
     }
 
     /**
      * @param currentYCenter the yCenter to set
      */
-    public void setYCenter(int currentYCenter, boolean doRepaint) {
+    public void setYCenter(double currentYCenter, boolean doRepaint) {
         this.yCenter = currentYCenter;
         if (doRepaint) {
             this.repaint();
@@ -518,6 +512,31 @@ public class MandelController extends JPanel implements MouseListener, KeyListen
      */
     public void setTransformer(AffineTransform transformer) {
         this.transformer = transformer;
+    }
+
+    /**
+     * @return the thumbnail
+     */
+    public boolean isThumbnail() {
+        return thumbnail;
+    }
+
+    /**
+     * @param thumbnail the thumbnail to set
+     */
+    public void setThumbnail(boolean thumbnail) {
+        this.thumbnail = thumbnail;
+    }
+
+    @Override
+    public void mouseWheelMoved(MouseWheelEvent e) {
+        System.out.println("Scroll amount " + e.getUnitsToScroll());
+        int zoomAmount = e.getUnitsToScroll() * (int) (zoom/Math.log(zoom));
+        zoom -= zoomAmount;
+        System.out.println("Zoom " + zoom);
+        System.out.println("Position " + e.getX() + " Y " + e.getY());
+        setXCenter(e.getX());
+        setYCenter(e.getY());
     }
 
 }
