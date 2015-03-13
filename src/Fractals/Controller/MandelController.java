@@ -585,6 +585,7 @@ public class MandelController extends JPanel implements MouseListener,
         System.out.println("Position " + e.getX() + " Y " + e.getY());
         //setXCenter(e.getX(), false);
         //setYCenter(e.getY());
+        this.repaint();
     }
 
 }
