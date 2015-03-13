@@ -16,7 +16,7 @@ import java.awt.image.BufferedImage;
  */
 public class MandelModel {
 
-    private int width, height, maxIterations;
+    private int width, height, maxIterations, noIterations;
     private MandelController mandelController;
     private BufferedImage image;
 
@@ -47,30 +47,17 @@ public class MandelModel {
         this.maxIterations = maxIterations;
         this.mandelController = mandelController;
         mandelController.setImageDrawn(false);
-        //MandelModel newMandel = new MandelModel();
         image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-        /*for (int y = 0; y < height; y++) {
-         for (int x = 0; x < width; x++) {
-         Complex point = new Complex((float) (x - mandelController.getXCenter()) / mandelController.getZoom(), (float) (y - mandelController.getYCenter()) / mandelController.getZoom());
-         //Work out the iterations taken diverge
-         int iter;
-         if (mandelController.isJuliaSet()) {
-         iter = newMandel.calculateJuliaPoint(point, mandelController.getFixed(), maxIterations);
-         } else {
-         iter = newMandel.calculateMandelPoint(point, maxIterations);
-         }
-         Color c = mandelController.getColour(maxIterations, iter);
-         int rgb = c.getRGB();
-         graph.setRGB(x, y, rgb);
-         }
-         }*/
-        Thread[] threads = new Thread[8];
+        
+        noIterations = Runtime.getRuntime().availableProcessors() * 2;        
+        
+        Thread[] threads = new Thread[noIterations];
 
-        for (int i = 0; i < 8; i++) {
+        for (int i = 0; i <noIterations; i++) {
             threads[i] = new Thread(new MThread(i));
             threads[i].start();
         }
-        for (int i = 0; i < 8; i++) {
+        for (int i = 0; i <noIterations; i++) {
             threads[i].join();
         }
         mandelController.setImageDrawn(true);
@@ -88,7 +75,7 @@ public class MandelModel {
         //Method uses the thread number to draw the mandelbrot in columns
         public void run() {
             MandelModel newMandel = new MandelModel();
-            for (int x = i; x < width; x += 8) {
+            for (int x = i; x < width; x += noIterations) {
                 for (int y = 0; y < height; y++) {
                     Complex point = new Complex((float) (x - mandelController.getXCenter()) / mandelController.getZoom(), (float) (y - mandelController.getYCenter()) / mandelController.getZoom());
                     //Work out the iterations taken diverge

@@ -8,6 +8,8 @@ package Fractals.View;
 import Fractals.Controller.MandelController;
 import Fractals.Maths.Complex;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
@@ -31,7 +33,7 @@ import javax.swing.*;
  *
  * @author Lloyd
  */
-public class MandelView implements MouseListener, KeyListener, MouseMotionListener {
+public class MandelView implements MouseListener, KeyListener, MouseMotionListener, ActionListener {
 
     private final JLabel lblComplex = new JLabel();
     private MandelController pnlJulia, pnlMandel;
@@ -50,9 +52,16 @@ public class MandelView implements MouseListener, KeyListener, MouseMotionListen
      * @param filename
      * @throws IOException
      */
-    public void saveJulia(String filename) throws IOException {
+    public void exportJulia(String filename) throws IOException {
         File outputfile = new File(filename + ".jpg");
         ImageIO.write(pnlJulia.getImage(), "jpg", outputfile);
+    }
+
+    public void saveAsFavourite(Complex fixed, int zoom) {
+        FavButton favourite = new FavButton("Julia " + fixed + " at zoom level " + zoom, fixed, zoom);
+        favourite.setActionCommand("favourite");
+        favourite.addActionListener(this);
+        pnlFavourites.add(favourite);
     }
 
     public void setComplex(Complex point) {
@@ -88,7 +97,8 @@ public class MandelView implements MouseListener, KeyListener, MouseMotionListen
         this.btnShowFavourites = new JToggleButton("Show Favourites");
         this.txtIter = new JTextField("570", 5);
 
-        //Add Mouse Listeners        
+        //Add Mouse Listeners
+        btnSave.addMouseListener(this);
         btnSet.addMouseListener(this);
         btnExport.addMouseListener(this);
         btnReset.addMouseListener(this);
@@ -199,7 +209,7 @@ public class MandelView implements MouseListener, KeyListener, MouseMotionListen
             }
         });
 
-        pnlFavourites = new JPanel(new GridLayout(5, 3, 1, 1));
+        pnlFavourites = new JPanel(new FlowLayout(FlowLayout.CENTER));
 
         JScrollPane scroller = new JScrollPane();
         scroller.add(pnlFavourites);
@@ -227,7 +237,7 @@ public class MandelView implements MouseListener, KeyListener, MouseMotionListen
                     String time = calendar.get(Calendar.YEAR) + "-" + calendar.get(Calendar.MONTH) + 1 + "-" + calendar.get(Calendar.DAY_OF_MONTH) + "_" + calendar.get(Calendar.MILLISECOND);
                     System.out.println(time);
                     try {
-                        saveJulia("Julia_" + time);
+                        exportJulia("Julia_" + time);
                     } catch (IOException ex) {
                         Logger.getLogger(MandelView.class.getName()).log(Level.SEVERE, null, ex);
                     }
@@ -240,12 +250,7 @@ public class MandelView implements MouseListener, KeyListener, MouseMotionListen
                     setIterations();
                 } else if (src == btnSave) {
                     System.out.println("Saving " + pnlJulia.getFixed());
-                    /*MandelController favourite;
-                     favourite = new MandelController(MandelView.this,true);
-                     favourite.setFixed(pnlJulia.getFixed());
-                     favourite.setZoom(pnlJulia.getZoom());
-                     pnlFavourites.add(favourite);*/
-
+                    MandelView.this.saveAsFavourite(pnlJulia.getFixed(), pnlJulia.getZoom());
                 } else if (src == btnSet) {
                     System.out.println("Setting " + txtIter.getText());
                     setIterations();
@@ -348,6 +353,18 @@ public class MandelView implements MouseListener, KeyListener, MouseMotionListen
     @Override
     public void mouseMoved(MouseEvent e) {
         //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        if (e.getActionCommand().equals("favourite")) {
+            Object src = e.getSource();
+            if (src instanceof FavButton) {
+                FavButton favourite = (FavButton) src;
+                pnlJulia.setFixed(favourite.getFixed());
+                pnlJulia.setZoom(favourite.getZoom());
+            }
+        }
     }
 
 }
