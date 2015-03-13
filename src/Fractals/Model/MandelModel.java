@@ -77,7 +77,7 @@ public class MandelModel {
             MandelModel newMandel = new MandelModel();
             for (int x = i; x < width; x += noIterations) {
                 for (int y = 0; y < height; y++) {
-                    Complex point = new Complex((float) (x - mandelController.getXCenter()) / mandelController.getZoom(), (float) (y - mandelController.getYCenter()) / mandelController.getZoom());
+                    Complex point = new Complex((float) (x - mandelController.getXCenter()) / mandelController.getZoom(), (float) -(y - mandelController.getYCenter()) / mandelController.getZoom());
                     //Work out the iterations taken diverge
                     int iter;
                     if (mandelController.isJuliaSet()) {

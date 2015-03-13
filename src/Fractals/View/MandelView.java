@@ -42,7 +42,8 @@ public class MandelView implements MouseListener, KeyListener, MouseMotionListen
     private JButton btnSet, btnExport, btnReset, btnSave;
     private JToggleButton btnZoomMode, btnShowJulia, btnShowFavourites;
     private JTextField txtIter;
-    private boolean mousePressed;
+    private boolean mousePressed, imageAdded;
+    private FavButton latestButton;
 
     /**
      * Turn the image into a file
@@ -58,10 +59,15 @@ public class MandelView implements MouseListener, KeyListener, MouseMotionListen
     }
 
     public void saveAsFavourite(Complex fixed, int zoom) {
-        FavButton favourite = new FavButton("Julia " + fixed + " at zoom level " + zoom, fixed, zoom);
-        favourite.setActionCommand("favourite");
+        FavButton favourite = getFavButton(fixed, zoom);
         favourite.addActionListener(this);
         pnlFavourites.add(favourite);
+    }
+    
+    public FavButton getFavButton(Complex fixed, int zoom) {
+        FavButton favourite = new FavButton("Julia " + fixed + " at zoom level " + zoom, fixed, zoom);
+        favourite.setActionCommand("favourite");
+        return favourite;
     }
 
     public void setComplex(Complex point) {
@@ -250,7 +256,8 @@ public class MandelView implements MouseListener, KeyListener, MouseMotionListen
                     setIterations();
                 } else if (src == btnSave) {
                     System.out.println("Saving " + pnlJulia.getFixed());
-                    MandelView.this.saveAsFavourite(pnlJulia.getFixed(), pnlJulia.getZoom());
+                    latestButton = MandelView.this.getFavButton(pnlJulia.getFixed(), pnlJulia.getZoom());
+                    imageAdded = true;
                 } else if (src == btnSet) {
                     System.out.println("Setting " + txtIter.getText());
                     setIterations();
@@ -258,6 +265,7 @@ public class MandelView implements MouseListener, KeyListener, MouseMotionListen
             }
 
         }.start();
+        
     }
 
     public void setIterations() {

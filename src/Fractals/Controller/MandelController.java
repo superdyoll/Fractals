@@ -177,7 +177,7 @@ public class MandelController extends JPanel implements MouseListener, MouseWhee
     public void mouseClicked(MouseEvent e) {
         if (!isThumbnail()) {
             if (!isJuliaSet()) {
-                Complex point = new Complex(((float) (e.getX() - getXCenter()) / getZoom()), ((float) (e.getY() - getYCenter()) / getZoom()));
+                Complex point = new Complex(((float) (e.getX() - getXCenter()) / getZoom()), ((float) -(e.getY() - getYCenter()) / getZoom()));
                 view.setComplex(point);
             }
             getTransformer().translate(5, 5);
