@@ -236,6 +236,8 @@ public class MandelView implements MouseListener, KeyListener, MouseMotionListen
                     pnlMandel.setZoom(100);
                     pnlJulia.initialiseXY(false);
                     pnlJulia.setZoom(100);
+                    txtIter.setText("570");
+                    setIterations();
                 } else if (src == btnSave) {
                     System.out.println("Saving " + pnlJulia.getFixed());
                     /*MandelController favourite;
@@ -246,10 +248,17 @@ public class MandelView implements MouseListener, KeyListener, MouseMotionListen
 
                 } else if (src == btnSet) {
                     System.out.println("Setting " + txtIter.getText());
+                    setIterations();
                 }
             }
 
         }.start();
+    }
+
+    public void setIterations() {
+        int iterations = Integer.parseInt(txtIter.getText());
+        pnlMandel.setIterations(iterations);
+        pnlJulia.setIterations(iterations);
     }
 
     @Override

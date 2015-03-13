@@ -535,8 +535,8 @@ public class MandelController extends JPanel implements MouseListener, MouseWhee
         zoom -= zoomAmount;
         System.out.println("Zoom " + zoom);
         System.out.println("Position " + e.getX() + " Y " + e.getY());
-        setXCenter(e.getX());
-        setYCenter(e.getY());
+        setXCenter(e.getX()- getXCenter());
+        setYCenter(e.getY() - getYCenter());
     }
 
 }
